@@ -29,49 +29,49 @@ export const MobileControls = () => {
         </button>
       </div>
 
-      <div className="flex justify-between items-end mb-12 sm:mb-20">
+      <div className="flex justify-between items-end mb-4 sm:mb-10">
         {/* Bottom Left: Movement D-Pad */}
-        <div className="pointer-events-auto relative w-32 h-32 sm:w-40 sm:h-40 bg-white/5 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center">
+        <div className="pointer-events-auto relative w-28 h-28 sm:w-36 sm:h-36 bg-white/5 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center ml-2">
           <button
             onTouchStart={() => handleTouchStart('forward')}
             onTouchEnd={() => handleTouchEnd('forward')}
-            className="absolute top-1 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
+            className="absolute top-0.5 w-9 h-9 sm:w-11 sm:h-11 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <ChevronUp size={20} color="white" />
+            <ChevronUp size={18} color="white" />
           </button>
           <button
             onTouchStart={() => handleTouchStart('left')}
             onTouchEnd={() => handleTouchEnd('left')}
-            className="absolute left-1 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
+            className="absolute left-0.5 w-9 h-9 sm:w-11 sm:h-11 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <ChevronLeft size={20} color="white" />
+            <ChevronLeft size={18} color="white" />
           </button>
-          <div className="w-3 h-3 bg-white/20 rounded-full" />
+          <div className="w-2 h-2 bg-white/20 rounded-full" />
           <button
             onTouchStart={() => handleTouchStart('right')}
             onTouchEnd={() => handleTouchEnd('right')}
-            className="absolute right-1 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
+            className="absolute right-0.5 w-9 h-9 sm:w-11 sm:h-11 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <ChevronRight size={20} color="white" />
+            <ChevronRight size={18} color="white" />
           </button>
           <button
             onTouchStart={() => handleTouchStart('backward')}
             onTouchEnd={() => handleTouchEnd('backward')}
-            className="absolute bottom-1 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
+            className="absolute bottom-0.5 w-9 h-9 sm:w-11 sm:h-11 bg-white/10 rounded-xl flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <ChevronDown size={20} color="white" />
+            <ChevronDown size={18} color="white" />
           </button>
         </div>
 
         {/* Bottom Right: Jump Button */}
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto mr-2">
           <button
-            className="w-20 h-20 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-xl rounded-full flex flex-col items-center justify-center border-2 border-white/20 active:bg-white/30 active:scale-95 transition-all shadow-2xl group"
+            className="w-18 h-18 sm:w-22 sm:h-22 bg-white/10 backdrop-blur-xl rounded-full flex flex-col items-center justify-center border-2 border-white/20 active:bg-white/30 active:scale-95 transition-all shadow-2xl group"
             onTouchStart={() => setMovement('jump', true)}
             onTouchEnd={() => setMovement('jump', false)}
           >
-            <Zap size={28} className="text-yellow-400 mb-0.5 group-active:scale-110 transition-transform" />
-            <span className="text-[8px] sm:text-[10px] font-black text-white tracking-widest uppercase">Jump</span>
+            <Zap size={24} className="text-yellow-400 group-active:scale-110 transition-transform" />
+            <span className="text-[7px] sm:text-[9px] font-black text-white tracking-widest uppercase">Jump</span>
           </button>
         </div>
       </div>

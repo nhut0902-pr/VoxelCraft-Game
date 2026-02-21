@@ -88,10 +88,10 @@ export default function App() {
       <AnimatePresence>
         {showBugNotice && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute bottom-32 right-6 z-[60] max-w-[280px] pointer-events-auto"
+            className="absolute top-32 right-6 z-[60] max-w-[280px] pointer-events-auto"
           >
             <div className="bg-black/60 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl text-white relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500" />
