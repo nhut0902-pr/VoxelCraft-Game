@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { nanoid } from 'nanoid';
 
-export type BlockType = 'grass' | 'dirt' | 'log' | 'glass' | 'wood' | 'cobblestone';
+export type BlockType = 'grass' | 'dirt' | 'log' | 'glass' | 'wood' | 'cobblestone' | 'water' | 'leaf' | 'sand' | 'brick';
 export type ControlType = 'dpad' | 'joystick';
+export type MapType = 'plains' | 'desert' | 'forest';
 
 export interface Block {
   id: string;
@@ -19,6 +20,8 @@ interface ControlSettings {
 interface GameState {
   texture: BlockType;
   cubes: Block[];
+  inventory: Record<BlockType, number>;
+  mapType: MapType;
   buildMode: 'add' | 'remove';
   movement: { forward: number; backward: number; left: number; right: number; jump: boolean };
   playerScale: number;
@@ -30,16 +33,26 @@ interface GameState {
   setMovement: (direction: keyof GameState['movement'], value: number | boolean) => void;
   setPlayerScale: (scale: number) => void;
   setControlSettings: (settings: Partial<ControlSettings>) => void;
+  setMapType: (map: MapType) => void;
   saveWorld: () => void;
   resetWorld: () => void;
 }
 
-const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) || 'null');
+const getLocalStorage = (key: string) => {
+  const item = localStorage.getItem(key);
+  return item ? JSON.parse(item) : null;
+};
 const setLocalStorage = (key: string, value: any) => localStorage.setItem(key, JSON.stringify(value));
+
+const INITIAL_INVENTORY: Record<BlockType, number> = {
+  grass: 20, dirt: 20, log: 10, glass: 10, wood: 15, cobblestone: 15, water: 5, leaf: 10, sand: 10, brick: 10
+};
 
 export const useStore = create<GameState>((set) => ({
   texture: 'dirt',
   cubes: getLocalStorage('cubes') || [],
+  inventory: getLocalStorage('inventory') || INITIAL_INVENTORY,
+  mapType: getLocalStorage('mapType') || 'plains',
   buildMode: 'add',
   movement: { forward: 0, backward: 0, left: 0, right: 0, jump: false },
   playerScale: 1,
@@ -49,24 +62,47 @@ export const useStore = create<GameState>((set) => ({
     rightPos: { x: 20, y: 40 },
   },
   addCube: (x, y, z) => {
-    set((state) => ({
-      cubes: [
-        ...state.cubes,
-        {
-          id: nanoid(),
-          pos: [x, y, z],
-          type: state.texture,
-        },
-      ],
-    }));
+    set((state) => {
+      if (state.inventory[state.texture] <= 0) return state;
+      
+      const newInventory = { 
+        ...state.inventory, 
+        [state.texture]: state.inventory[state.texture] - 1 
+      };
+      setLocalStorage('inventory', newInventory);
+
+      return {
+        inventory: newInventory,
+        cubes: [
+          ...state.cubes,
+          {
+            id: nanoid(),
+            pos: [x, y, z],
+            type: state.texture,
+          },
+        ],
+      };
+    });
   },
   removeCube: (x, y, z) => {
-    set((state) => ({
-      cubes: state.cubes.filter((cube) => {
-        const [cx, cy, cz] = cube.pos;
-        return cx !== x || cy !== y || cz !== z;
-      }),
-    }));
+    set((state) => {
+      const cubeToRemove = state.cubes.find(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z);
+      if (!cubeToRemove) return state;
+
+      const newInventory = { 
+        ...state.inventory, 
+        [cubeToRemove.type]: state.inventory[cubeToRemove.type] + 1 
+      };
+      setLocalStorage('inventory', newInventory);
+
+      return {
+        inventory: newInventory,
+        cubes: state.cubes.filter((cube) => {
+          const [cx, cy, cz] = cube.pos;
+          return cx !== x || cy !== y || cz !== z;
+        }),
+      };
+    });
   },
   setTexture: (texture) => {
     set(() => ({
@@ -91,15 +127,23 @@ export const useStore = create<GameState>((set) => ({
       return { controlSettings: newSettings };
     });
   },
+  setMapType: (map) => {
+    set(() => {
+      setLocalStorage('mapType', map);
+      return { mapType: map };
+    });
+  },
   saveWorld: () => {
     set((state) => {
       setLocalStorage('cubes', state.cubes);
+      setLocalStorage('inventory', state.inventory);
       return state;
     });
   },
   resetWorld: () => {
     set(() => ({
       cubes: [],
+      inventory: INITIAL_INVENTORY,
     }));
   },
 }));

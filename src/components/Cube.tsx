@@ -9,6 +9,10 @@ const blockColors: Record<BlockType, string> = {
   wood: '#795548',
   log: '#3e2723',
   cobblestone: '#616161',
+  water: '#0288d1',
+  leaf: '#2e7d32',
+  sand: '#fbc02d',
+  brick: '#d32f2f',
 };
 
 export const Cube = ({ position, type }: { position: [number, number, number], type: BlockType }) => {
@@ -51,14 +55,14 @@ export const Cube = ({ position, type }: { position: [number, number, number], t
       <boxGeometry />
       <meshStandardMaterial
         color={hover !== null ? '#ffffff' : blockColors[type]}
-        transparent={type === 'glass'}
-        opacity={type === 'glass' ? 0.4 : 1}
-        roughness={type === 'glass' ? 0.1 : 0.8}
-        metalness={type === 'glass' ? 0.5 : 0.1}
+        transparent={type === 'glass' || type === 'water'}
+        opacity={type === 'glass' ? 0.4 : type === 'water' ? 0.6 : 1}
+        roughness={type === 'glass' || type === 'water' ? 0.1 : 0.8}
+        metalness={type === 'glass' || type === 'water' ? 0.5 : 0.1}
       />
       <Edges
         threshold={15}
-        color={type === 'glass' ? '#ffffff' : '#000000'}
+        color={type === 'glass' || type === 'water' ? '#ffffff' : '#000000'}
         scale={1}
         renderOrder={1}
       />

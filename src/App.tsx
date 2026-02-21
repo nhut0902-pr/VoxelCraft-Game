@@ -11,9 +11,10 @@ import { useEffect, useState } from 'react';
 import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { LoadingScreen } from './components/LoadingScreen';
+import { generateWorld } from './utils/worldGenerator';
 
 export default function App() {
-  const { saveWorld, resetWorld, playerScale, setPlayerScale } = useStore();
+  const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, mapType } = useStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showBugNotice, setShowBugNotice] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +26,13 @@ export default function App() {
     
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    // Initial world generation if empty
+    if (cubes.length === 0) {
+      const initialCubes = generateWorld(mapType);
+      useStore.setState({ cubes: initialCubes });
+    }
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 

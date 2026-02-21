@@ -12,6 +12,10 @@ interface KeyboardState {
   digit4: boolean;
   digit5: boolean;
   digit6: boolean;
+  digit7: boolean;
+  digit8: boolean;
+  digit9: boolean;
+  digit0: boolean;
 }
 
 export const useKeyboard = () => {
@@ -27,6 +31,10 @@ export const useKeyboard = () => {
     digit4: false,
     digit5: false,
     digit6: false,
+    digit7: false,
+    digit8: false,
+    digit9: false,
+    digit0: false,
   });
 
   useEffect(() => {
@@ -70,6 +78,18 @@ export const useKeyboard = () => {
         case 'Digit6':
           setActions((prev) => ({ ...prev, digit6: true }));
           break;
+        case 'Digit7':
+          setActions((prev) => ({ ...prev, digit7: true }));
+          break;
+        case 'Digit8':
+          setActions((prev) => ({ ...prev, digit8: true }));
+          break;
+        case 'Digit9':
+          setActions((prev) => ({ ...prev, digit9: true }));
+          break;
+        case 'Digit0':
+          setActions((prev) => ({ ...prev, digit0: true }));
+          break;
       }
     };
 
@@ -112,6 +132,18 @@ export const useKeyboard = () => {
           break;
         case 'Digit6':
           setActions((prev) => ({ ...prev, digit6: false }));
+          break;
+        case 'Digit7':
+          setActions((prev) => ({ ...prev, digit7: false }));
+          break;
+        case 'Digit8':
+          setActions((prev) => ({ ...prev, digit8: false }));
+          break;
+        case 'Digit9':
+          setActions((prev) => ({ ...prev, digit9: false }));
+          break;
+        case 'Digit0':
+          setActions((prev) => ({ ...prev, digit0: false }));
           break;
       }
     };

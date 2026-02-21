@@ -1,11 +1,20 @@
-import { useStore } from '../hooks/useStore';
+import { useStore, MapType } from '../hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings as SettingsIcon, X, Move, Layout, MousePointer2 } from 'lucide-react';
+import { Settings as SettingsIcon, X, Move, Layout, MousePointer2, Map as MapIcon, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
+import { generateWorld } from '../utils/worldGenerator';
 
 export const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { controlSettings, setControlSettings } = useStore();
+  const { controlSettings, setControlSettings, mapType, setMapType, resetWorld } = useStore();
+
+  const handleMapChange = (type: MapType) => {
+    if (confirm(`Bạn có chắc muốn đổi sang bản đồ ${type}? Thế giới hiện tại sẽ bị xóa!`)) {
+      setMapType(type);
+      const newCubes = generateWorld(type);
+      useStore.setState({ cubes: newCubes });
+    }
+  };
 
   return (
     <>
@@ -29,14 +38,14 @@ export const Settings = () => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-slate-900 border border-white/10 rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl"
+              className="bg-slate-900 border border-white/10 rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5 sticky top-0 z-10 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-500/20 rounded-xl">
                     <SettingsIcon size={20} className="text-blue-400" />
                   </div>
-                  <h2 className="text-xl font-black uppercase tracking-tighter text-white">Cài đặt điều khiển</h2>
+                  <h2 className="text-xl font-black uppercase tracking-tighter text-white">Cài đặt</h2>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
@@ -47,6 +56,29 @@ export const Settings = () => {
               </div>
 
               <div className="p-6 space-y-8">
+                {/* Map Selection */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-white/60">
+                    <MapIcon size={16} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Chọn Bản Đồ</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['plains', 'desert', 'forest'] as MapType[]).map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => handleMapChange(m)}
+                        className={`py-3 rounded-xl border-2 transition-all text-[10px] font-black uppercase tracking-tighter ${
+                          mapType === m 
+                            ? 'bg-emerald-500/20 border-emerald-500 text-white' 
+                            : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Control Type */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-white/60">
@@ -115,6 +147,22 @@ export const Settings = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Danger Zone */}
+                <div className="pt-4 border-t border-white/5">
+                  <button
+                    onClick={() => {
+                      if (confirm('Bạn có chắc muốn xóa toàn bộ thế giới?')) {
+                        resetWorld();
+                        setIsOpen(false);
+                      }
+                    }}
+                    className="w-full py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-rose-500/20 transition-all flex items-center justify-center gap-2"
+                  >
+                    <RefreshCcw size={14} />
+                    Reset Thế giới
+                  </button>
                 </div>
               </div>
 
