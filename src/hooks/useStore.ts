@@ -2,11 +2,18 @@ import { create } from 'zustand';
 import { nanoid } from 'nanoid';
 
 export type BlockType = 'grass' | 'dirt' | 'log' | 'glass' | 'wood' | 'cobblestone';
+export type ControlType = 'dpad' | 'joystick';
 
 export interface Block {
   id: string;
   pos: [number, number, number];
   type: BlockType;
+}
+
+interface ControlSettings {
+  type: ControlType;
+  leftPos: { x: number, y: number };
+  rightPos: { x: number, y: number };
 }
 
 interface GameState {
@@ -15,17 +22,19 @@ interface GameState {
   buildMode: 'add' | 'remove';
   movement: { forward: number; backward: number; left: number; right: number; jump: boolean };
   playerScale: number;
+  controlSettings: ControlSettings;
   addCube: (x: number, y: number, z: number) => void;
   removeCube: (x: number, y: number, z: number) => void;
   setTexture: (texture: BlockType) => void;
   setBuildMode: (mode: 'add' | 'remove') => void;
   setMovement: (direction: keyof GameState['movement'], value: number | boolean) => void;
   setPlayerScale: (scale: number) => void;
+  setControlSettings: (settings: Partial<ControlSettings>) => void;
   saveWorld: () => void;
   resetWorld: () => void;
 }
 
-const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) || '[]');
+const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) || 'null');
 const setLocalStorage = (key: string, value: any) => localStorage.setItem(key, JSON.stringify(value));
 
 export const useStore = create<GameState>((set) => ({
@@ -34,6 +43,11 @@ export const useStore = create<GameState>((set) => ({
   buildMode: 'add',
   movement: { forward: 0, backward: 0, left: 0, right: 0, jump: false },
   playerScale: 1,
+  controlSettings: getLocalStorage('controlSettings') || {
+    type: 'dpad',
+    leftPos: { x: 20, y: 40 },
+    rightPos: { x: 20, y: 40 },
+  },
   addCube: (x, y, z) => {
     set((state) => ({
       cubes: [
@@ -69,6 +83,13 @@ export const useStore = create<GameState>((set) => ({
   },
   setPlayerScale: (scale) => {
     set(() => ({ playerScale: scale }));
+  },
+  setControlSettings: (settings) => {
+    set((state) => {
+      const newSettings = { ...state.controlSettings, ...settings };
+      setLocalStorage('controlSettings', newSettings);
+      return { controlSettings: newSettings };
+    });
   },
   saveWorld: () => {
     set((state) => {

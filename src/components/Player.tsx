@@ -14,10 +14,10 @@ export const Player = () => {
   const { movement, playerScale } = useStore();
   
   // Combine keyboard and store movement
-  const moveForward = keyboardActions.moveForward || movement.forward > 0.5;
-  const moveBackward = keyboardActions.moveBackward || movement.backward > 0.5;
-  const moveLeft = keyboardActions.moveLeft || movement.left > 0.5;
-  const moveRight = keyboardActions.moveRight || movement.right > 0.5;
+  const moveForward = keyboardActions.moveForward ? 1 : movement.forward;
+  const moveBackward = keyboardActions.moveBackward ? 1 : movement.backward;
+  const moveLeft = keyboardActions.moveLeft ? 1 : movement.left;
+  const moveRight = keyboardActions.moveRight ? 1 : movement.right;
   const jump = keyboardActions.jump || movement.jump;
 
   // Simple physics state
@@ -80,13 +80,14 @@ export const Player = () => {
     }
 
     const direction = new Vector3();
-    const frontVector = new Vector3(0, 0, Number(moveBackward) - Number(moveForward));
-    const sideVector = new Vector3(Number(moveLeft) - Number(moveRight), 0, 0);
+    const frontVector = new Vector3(0, 0, moveBackward - moveForward);
+    const sideVector = new Vector3(moveLeft - moveRight, 0, 0);
 
     direction
       .subVectors(frontVector, sideVector)
+      // Only normalize if there's significant movement to avoid jitter
       .normalize()
-      .multiplyScalar(currentSpeed)
+      .multiplyScalar(currentSpeed * Math.max(moveForward, moveBackward, moveLeft, moveRight, 0.001))
       .applyEuler(camera.rotation);
 
     pos.current[0] += direction.x * delta;

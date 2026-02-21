@@ -9,6 +9,7 @@ import { useStore } from './hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone } from 'lucide-react';
+import { Settings } from './components/Settings';
 
 export default function App() {
   const { saveWorld, resetWorld, playerScale, setPlayerScale } = useStore();
@@ -155,6 +156,7 @@ export default function App() {
               {playerScale === 1 ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
               <span className="text-[10px] font-bold uppercase tracking-wider">{playerScale === 1 ? 'Shrink' : 'Grow'}</span>
             </button>
+            <Settings />
           </div>
         </div>
       </motion.div>
