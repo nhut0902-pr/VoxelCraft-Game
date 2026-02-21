@@ -1,0 +1,7 @@
+{
+  "name": "VoxelCraft",
+  "description": "A 3D voxel-based building game inspired by Minecraft, featuring world exploration, block placement, and first-person controls.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
