@@ -46,11 +46,11 @@ export const TextureSelector = () => {
   if (!visible) return null;
 
   return (
-    <div className="absolute bottom-8 sm:bottom-14 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 bg-white/5 p-2 rounded-[2.5rem] backdrop-blur-2xl border border-white/10 z-50 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <div className="absolute bottom-6 sm:bottom-14 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-3 bg-white/5 p-1.5 sm:p-2 rounded-[2.5rem] backdrop-blur-2xl border border-white/10 z-50 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-w-[95vw] overflow-x-auto no-scrollbar">
       {(['dirt', 'grass', 'glass', 'wood', 'log', 'cobblestone'] as BlockType[]).map((k) => (
         <button
           key={k}
-          className={`w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-xl sm:text-3xl rounded-full cursor-pointer transition-all duration-300 relative group ${
+          className={`w-9 h-9 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center text-lg sm:text-3xl rounded-full cursor-pointer transition-all duration-300 relative group ${
             k === activeTexture 
               ? 'bg-white/20 scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
               : 'hover:bg-white/10'

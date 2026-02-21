@@ -8,40 +8,32 @@ import { MobileControls } from './components/MobileControls';
 import { useStore } from './hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone } from 'lucide-react';
+import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box } from 'lucide-react';
 import { Settings } from './components/Settings';
+import { LoadingScreen } from './components/LoadingScreen';
 
 export default function App() {
   const { saveWorld, resetWorld, playerScale, setPlayerScale } = useStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showBugNotice, setShowBugNotice] = useState(true);
-  const [isPortrait, setIsPortrait] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
     };
     
-    const checkOrientation = () => {
-      setIsPortrait(window.innerHeight > window.innerWidth);
-    };
-
     checkMobile();
-    checkOrientation();
-    
-    window.addEventListener('resize', () => {
-      checkMobile();
-      checkOrientation();
-    });
-    
-    return () => window.removeEventListener('resize', () => {
-      checkMobile();
-      checkOrientation();
-    });
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   return (
     <div className="w-full h-screen bg-slate-900 relative overflow-hidden font-sans">
+      <AnimatePresence>
+        {isLoading && <LoadingScreen onFinished={() => setIsLoading(false)} />}
+      </AnimatePresence>
+
       <Canvas shadows camera={{ fov: 45 }}>
         <Sky sunPosition={[100, 100, 20]} />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
@@ -51,30 +43,6 @@ export default function App() {
         <Cubes />
         <Ground />
       </Canvas>
-
-      {/* Orientation Warning Overlay */}
-      <AnimatePresence>
-        {isMobile && isPortrait && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center text-white p-10 text-center"
-          >
-            <motion.div
-              animate={{ rotate: [0, 90, 0] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="mb-8"
-            >
-              <Smartphone size={64} className="text-blue-400" />
-            </motion.div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter mb-4">Vui lòng xoay ngang thiết bị</h2>
-            <p className="text-sm opacity-60 max-w-xs leading-relaxed">
-              VoxelCraft được tối ưu hóa cho màn hình ngang. Hãy xoay điện thoại của bạn để có trải nghiệm xây dựng tốt nhất!
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Crosshair */}
       {!isMobile && (

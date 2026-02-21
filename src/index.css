@@ -5,6 +5,14 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
