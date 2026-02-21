@@ -29,7 +29,7 @@ export const MobileControls = () => {
         </button>
       </div>
 
-      <div className="flex justify-between items-end mb-4 sm:mb-10">
+      <div className="flex justify-between items-end mb-10 sm:mb-16">
         {/* Bottom Left: Movement D-Pad */}
         <div className="pointer-events-auto relative w-28 h-28 sm:w-36 sm:h-36 bg-white/5 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center ml-2">
           <button

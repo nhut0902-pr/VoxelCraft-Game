@@ -46,7 +46,7 @@ export const TextureSelector = () => {
   if (!visible) return null;
 
   return (
-    <div className="absolute bottom-4 sm:bottom-10 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 bg-white/5 p-2 rounded-[2.5rem] backdrop-blur-2xl border border-white/10 z-50 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <div className="absolute bottom-8 sm:bottom-14 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 bg-white/5 p-2 rounded-[2.5rem] backdrop-blur-2xl border border-white/10 z-50 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
       {(['dirt', 'grass', 'glass', 'wood', 'log', 'cobblestone'] as BlockType[]).map((k) => (
         <button
           key={k}
