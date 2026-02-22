@@ -1,5 +1,5 @@
 import { useThree, useFrame } from '@react-three/fiber';
-import { PointerLockControls } from '@react-three/drei';
+import { PointerLockControls, OrbitControls } from '@react-three/drei';
 import { useRef, useEffect } from 'react';
 import { Vector3, PerspectiveCamera } from 'three';
 import { useKeyboard } from '../hooks/useKeyboard';
@@ -11,7 +11,7 @@ const BASE_SPEED = 4;
 export const Player = () => {
   const { camera, gl } = useThree();
   const keyboardActions = useKeyboard();
-  const { movement, playerScale } = useStore();
+  const { movement, playerScale, cameraMode } = useStore();
   
   // Combine keyboard and store movement
   const moveForward = keyboardActions.moveForward ? 1 : movement.forward;
@@ -29,7 +29,7 @@ export const Player = () => {
   const isTouchDevice = useRef('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   useEffect(() => {
-    if (!isTouchDevice.current) return;
+    if (!isTouchDevice.current || cameraMode === 'orbit') return;
 
     let lastTouchX = 0;
     let lastTouchY = 0;
@@ -63,9 +63,11 @@ export const Player = () => {
       gl.domElement.removeEventListener('touchstart', handleTouchStart);
       gl.domElement.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [gl]);
+  }, [gl, cameraMode]);
 
   useFrame((state, delta) => {
+    if (cameraMode === 'orbit') return;
+
     if (isTouchDevice.current) {
       camera.rotation.set(touchRotation.current.x, touchRotation.current.y, 0, 'YXZ');
     }
@@ -85,7 +87,6 @@ export const Player = () => {
 
     direction
       .subVectors(frontVector, sideVector)
-      // Only normalize if there's significant movement to avoid jitter
       .normalize()
       .multiplyScalar(currentSpeed * Math.max(moveForward, moveBackward, moveLeft, moveRight, 0.001))
       .applyEuler(camera.rotation);
@@ -93,9 +94,6 @@ export const Player = () => {
     pos.current[0] += direction.x * delta;
     pos.current[2] += direction.z * delta;
 
-    // Extreme shrinking: 
-    // Normal: minHeight 0.1, cameraOffset 1.5 (Total 1.6m)
-    // Small (0.05): minHeight 0.005, cameraOffset 0.075 (Total 0.08m - like an ant)
     const minHeight = 0.1 * playerScale; 
     const cameraOffset = 1.5 * playerScale;
 
@@ -116,7 +114,11 @@ export const Player = () => {
 
   return (
     <>
-      {!isTouchDevice.current && <PointerLockControls />}
+      {cameraMode === 'first-person' ? (
+        !isTouchDevice.current && <PointerLockControls />
+      ) : (
+        <OrbitControls makeDefault />
+      )}
     </>
   );
 };

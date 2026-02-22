@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 export type BlockType = 'grass' | 'dirt' | 'log' | 'glass' | 'wood' | 'cobblestone' | 'water' | 'leaf' | 'sand' | 'brick';
 export type ControlType = 'dpad' | 'joystick';
 export type MapType = 'plains' | 'desert' | 'forest';
+export type WeatherType = 'clear' | 'rain' | 'storm';
 
 export interface Block {
   id: string;
@@ -25,6 +26,8 @@ interface GameState {
   buildMode: 'add' | 'remove';
   movement: { forward: number; backward: number; left: number; right: number; jump: boolean };
   playerScale: number;
+  cameraMode: 'first-person' | 'orbit';
+  weather: WeatherType;
   controlSettings: ControlSettings;
   addCube: (x: number, y: number, z: number) => void;
   removeCube: (x: number, y: number, z: number) => void;
@@ -32,6 +35,8 @@ interface GameState {
   setBuildMode: (mode: 'add' | 'remove') => void;
   setMovement: (direction: keyof GameState['movement'], value: number | boolean) => void;
   setPlayerScale: (scale: number) => void;
+  setCameraMode: (mode: 'first-person' | 'orbit') => void;
+  setWeather: (weather: WeatherType) => void;
   setControlSettings: (settings: Partial<ControlSettings>) => void;
   setMapType: (map: MapType) => void;
   saveWorld: () => void;
@@ -56,6 +61,8 @@ export const useStore = create<GameState>((set) => ({
   buildMode: 'add',
   movement: { forward: 0, backward: 0, left: 0, right: 0, jump: false },
   playerScale: 1,
+  cameraMode: 'first-person',
+  weather: 'clear',
   controlSettings: getLocalStorage('controlSettings') || {
     type: 'dpad',
     leftPos: { x: 20, y: 40 },
@@ -119,6 +126,12 @@ export const useStore = create<GameState>((set) => ({
   },
   setPlayerScale: (scale) => {
     set(() => ({ playerScale: scale }));
+  },
+  setCameraMode: (mode) => {
+    set(() => ({ cameraMode: mode }));
+  },
+  setWeather: (weather) => {
+    set(() => ({ weather }));
   },
   setControlSettings: (settings) => {
     set((state) => {

@@ -1,18 +1,19 @@
 import { useStore, MapType } from '../hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings as SettingsIcon, X, Move, Layout, MousePointer2, Map as MapIcon, RefreshCcw } from 'lucide-react';
+import { Settings as SettingsIcon, X, Move, Layout, MousePointer2, Map as MapIcon, RefreshCcw, Save } from 'lucide-react';
 import { useState } from 'react';
 import { generateWorld } from '../utils/worldGenerator';
 
 export const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { controlSettings, setControlSettings, mapType, setMapType, resetWorld } = useStore();
+  const { controlSettings, setControlSettings, mapType, setMapType, resetWorld, saveWorld } = useStore();
 
   const handleMapChange = (type: MapType) => {
     if (confirm(`Bạn có chắc muốn đổi sang bản đồ ${type}? Thế giới hiện tại sẽ bị xóa!`)) {
       setMapType(type);
       const newCubes = generateWorld(type);
       useStore.setState({ cubes: newCubes });
+      setIsOpen(false);
     }
   };
 
@@ -56,11 +57,29 @@ export const Settings = () => {
               </div>
 
               <div className="p-6 space-y-8">
+                {/* Save Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-white/60">
+                    <Save size={16} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Lưu trữ</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      saveWorld();
+                      alert('Đã lưu thế giới thành công!');
+                    }}
+                    className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3"
+                  >
+                    <Save size={20} />
+                    Lưu thế giới hiện tại
+                  </button>
+                </div>
+
                 {/* Map Selection */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-white/60">
                     <MapIcon size={16} />
-                    <span className="text-xs font-bold uppercase tracking-wider">Chọn Bản Đồ</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Thay đổi Bản Đồ</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {(['plains', 'desert', 'forest'] as MapType[]).map((m) => (
@@ -69,7 +88,7 @@ export const Settings = () => {
                         onClick={() => handleMapChange(m)}
                         className={`py-3 rounded-xl border-2 transition-all text-[10px] font-black uppercase tracking-tighter ${
                           mapType === m 
-                            ? 'bg-emerald-500/20 border-emerald-500 text-white' 
+                            ? 'bg-blue-500/20 border-blue-500 text-white' 
                             : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
                         }`}
                       >

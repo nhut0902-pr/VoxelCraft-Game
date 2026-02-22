@@ -1,5 +1,4 @@
 import { Canvas } from '@react-three/fiber';
-import { Sky, Stars } from '@react-three/drei';
 import { Ground } from './components/Ground';
 import { Player } from './components/Player';
 import { Cubes } from './components/Cubes';
@@ -8,16 +7,19 @@ import { MobileControls } from './components/MobileControls';
 import { useStore } from './hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box } from 'lucide-react';
+import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box, Map as MapIcon, Eye } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { LoadingScreen } from './components/LoadingScreen';
-import { generateWorld } from './utils/worldGenerator';
+import { MapSelection } from './components/MapSelection';
+
+import { DayNightCycle } from './components/DayNightCycle';
 
 export default function App() {
-  const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, mapType } = useStore();
+  const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, cameraMode, setCameraMode, weather } = useStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showBugNotice, setShowBugNotice] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [showMapSelection, setShowMapSelection] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -27,30 +29,46 @@ export default function App() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Initial world generation if empty
-    if (cubes.length === 0) {
-      const initialCubes = generateWorld(mapType);
-      useStore.setState({ cubes: initialCubes });
-    }
-
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const handleLoadingFinished = () => {
+    setIsLoading(false);
+    if (cubes.length === 0) {
+      setShowMapSelection(true);
+    }
+  };
 
   return (
     <div className="w-full h-screen bg-slate-900 relative overflow-hidden font-sans">
       <AnimatePresence>
-        {isLoading && <LoadingScreen onFinished={() => setIsLoading(false)} />}
+        {isLoading && <LoadingScreen onFinished={handleLoadingFinished} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showMapSelection && (
+          <MapSelection onSelect={() => setShowMapSelection(false)} />
+        )}
       </AnimatePresence>
 
       <Canvas shadows camera={{ fov: 45 }}>
-        <Sky sunPosition={[100, 100, 20]} />
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-        <ambientLight intensity={1.5} />
-        <pointLight position={[10, 10, 10]} castShadow intensity={2} />
+        <DayNightCycle />
         <Player />
         <Cubes />
         <Ground />
       </Canvas>
+
+      {/* Weather UI Indicator */}
+      <div className="absolute top-24 left-6 z-50 pointer-events-none">
+        <div className="bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${
+            weather === 'clear' ? 'bg-yellow-400' : weather === 'rain' ? 'bg-blue-400' : 'bg-purple-500 animate-pulse'
+          }`} />
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
+            Thời tiết: {weather === 'clear' ? 'Nắng' : weather === 'rain' ? 'Mưa' : 'Bão'}
+          </span>
+        </div>
+      </div>
 
       {/* Crosshair */}
       {!isMobile && (
@@ -110,18 +128,22 @@ export default function App() {
 
           <div className="flex gap-1.5">
             <button 
-              onClick={saveWorld}
-              className="p-2 bg-white/10 hover:bg-emerald-500/50 text-white rounded-xl transition-all border border-white/10 group"
+              onClick={() => {
+                saveWorld();
+                alert('Đã lưu thế giới thành công!');
+              }}
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all border border-emerald-400/50 group flex items-center gap-2 shadow-lg shadow-emerald-500/20"
               title="Save World"
             >
               <Save size={18} className="group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Lưu Game</span>
             </button>
             <button 
-              onClick={resetWorld}
-              className="p-2 bg-white/10 hover:bg-rose-500/50 text-white rounded-xl transition-all border border-white/10 group"
-              title="Reset World"
+              onClick={() => setShowMapSelection(true)}
+              className="p-2 bg-white/10 hover:bg-blue-500/50 text-white rounded-xl transition-all border border-white/10 group"
+              title="Change Map"
             >
-              <RotateCcw size={18} className="group-hover:rotate-180 transition-transform duration-500" />
+              <MapIcon size={18} className="group-hover:scale-110 transition-transform" />
             </button>
             <button 
               onClick={() => setPlayerScale(playerScale === 1 ? 0.05 : 1)}
@@ -131,6 +153,16 @@ export default function App() {
             >
               {playerScale === 1 ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
               <span className="text-[10px] font-bold uppercase tracking-wider">{playerScale === 1 ? 'Shrink' : 'Grow'}</span>
+            </button>
+            <button 
+              onClick={() => setCameraMode(cameraMode === 'first-person' ? 'orbit' : 'first-person')}
+              className={`p-2 rounded-xl transition-all border border-white/10 group flex items-center gap-2 px-3 ${
+                cameraMode === 'orbit' ? 'bg-blue-500 text-white' : 'bg-white/10 hover:bg-blue-500/50'
+              }`}
+              title="Toggle Camera Mode"
+            >
+              <Eye size={18} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">{cameraMode === 'orbit' ? 'Orbit' : 'FPS'}</span>
             </button>
             <Settings />
           </div>

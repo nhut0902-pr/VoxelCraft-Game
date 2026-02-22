@@ -11,8 +11,8 @@ export const Ground = () => {
       onClick={(e) => {
         e.stopPropagation();
         if (buildMode === 'remove') return;
-        const [x, y, z] = Object.values(e.point).map((val) => Math.ceil(val));
-        addCube(x, y, z);
+        const { x, y, z } = e.point;
+        addCube(Math.round(x), Math.round(y), Math.round(z));
       }}
     >
       <planeGeometry args={[1000, 1000]} />

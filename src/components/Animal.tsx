@@ -1,18 +1,17 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Euler, Group } from 'three';
+import { Vector3, Group } from 'three';
 
 export const Animal = ({ position }: { position: [number, number, number] }) => {
   const meshRef = useRef<Group>(null);
-  const [targetPos, setTargetPos] = useState(new Vector3(...position));
-  const [currentPos, setCurrentPos] = useState(new Vector3(...position));
-  const [rotation, setRotation] = useState(new Euler(0, 0, 0));
+  const targetPos = useRef(new Vector3(...position));
+  const currentPos = useRef(new Vector3(...position));
 
   useEffect(() => {
     const interval = setInterval(() => {
       const newX = position[0] + (Math.random() - 0.5) * 20;
       const newZ = position[2] + (Math.random() - 0.5) * 20;
-      setTargetPos(new Vector3(newX, position[1], newZ));
+      targetPos.current.set(newX, position[1], newZ);
     }, 5000 + Math.random() * 5000);
 
     return () => clearInterval(interval);
@@ -22,12 +21,11 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
     if (!meshRef.current) return;
 
     // Move towards target
-    const dir = new Vector3().subVectors(targetPos, currentPos);
+    const dir = new Vector3().subVectors(targetPos.current, currentPos.current);
     if (dir.length() > 0.1) {
       dir.normalize().multiplyScalar(1 * delta);
-      const nextPos = currentPos.clone().add(dir);
-      setCurrentPos(nextPos);
-      meshRef.current.position.copy(nextPos);
+      currentPos.current.add(dir);
+      meshRef.current.position.copy(currentPos.current);
 
       // Rotate towards movement
       const angle = Math.atan2(dir.x, dir.z);
