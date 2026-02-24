@@ -7,19 +7,21 @@ import { MobileControls } from './components/MobileControls';
 import { useStore } from './hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box, Map as MapIcon, Eye } from 'lucide-react';
+import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box, Map as MapIcon, Eye, ShoppingBag, Coins } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { LoadingScreen } from './components/LoadingScreen';
 import { MapSelection } from './components/MapSelection';
+import { ShopModal } from './components/ShopModal';
 
 import { DayNightCycle } from './components/DayNightCycle';
 
 export default function App() {
-  const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, cameraMode, setCameraMode, weather } = useStore();
+  const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, cameraMode, setCameraMode, weather, coins } = useStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showBugNotice, setShowBugNotice] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showMapSelection, setShowMapSelection] = useState(false);
+  const [showShop, setShowShop] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -48,6 +50,12 @@ export default function App() {
       <AnimatePresence>
         {showMapSelection && (
           <MapSelection onSelect={() => setShowMapSelection(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showShop && (
+          <ShopModal isOpen={showShop} onClose={() => setShowShop(false)} />
         )}
       </AnimatePresence>
 
@@ -163,6 +171,19 @@ export default function App() {
             >
               <Eye size={18} />
               <span className="text-[10px] font-bold uppercase tracking-wider">{cameraMode === 'orbit' ? 'Orbit' : 'FPS'}</span>
+            </button>
+            <button 
+              onClick={() => setShowShop(true)}
+              className="p-2 bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-500 rounded-xl transition-all border border-yellow-500/30 group flex items-center gap-2 px-3"
+              title="Shop"
+            >
+              <ShoppingBag size={18} />
+              <div className="flex flex-col items-start leading-none">
+                <span className="text-[8px] font-black uppercase opacity-60">Cửa hàng</span>
+                <span className="text-[10px] font-black uppercase flex items-center gap-1">
+                  <Coins size={10} /> {coins}
+                </span>
+              </div>
             </button>
             <Settings />
           </div>

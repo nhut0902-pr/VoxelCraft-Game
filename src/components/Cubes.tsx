@@ -3,6 +3,7 @@ import { Animal } from './Animal';
 import { useRef, useMemo, useEffect } from 'react';
 import { InstancedMesh, Object3D, Color } from 'three';
 import { useFrame } from '@react-three/fiber';
+import { useSounds } from '../hooks/useSounds';
 
 const blockColors: Record<BlockType, string> = {
   dirt: '#5d4037',
@@ -25,7 +26,18 @@ export const Cubes = () => {
   const addCube = useStore((state) => state.addCube);
   const removeCube = useStore((state) => state.removeCube);
   const buildMode = useStore((state) => state.buildMode);
+  const npcCount = useStore((state) => state.npcCount);
+  const { playSound } = useSounds();
   
+  // Generate random positions for NPCs
+  const npcPositions = useMemo(() => {
+    return Array.from({ length: npcCount }).map(() => [
+      (Math.random() - 0.5) * 30,
+      0,
+      (Math.random() - 0.5) * 30
+    ] as [number, number, number]);
+  }, [npcCount]);
+
   // Group cubes by type for instancing
   const cubesByType = useMemo(() => {
     const groups: Record<string, typeof cubes> = {};
@@ -46,16 +58,17 @@ export const Cubes = () => {
           addCube={addCube}
           removeCube={removeCube}
           buildMode={buildMode}
+          playSound={playSound}
         />
       ))}
-      <Animal position={[5, 0, 5]} />
-      <Animal position={[-5, 0, -5]} />
-      <Animal position={[10, 0, -10]} />
+      {npcPositions.map((pos, i) => (
+        <Animal key={i} position={pos} />
+      ))}
     </>
   );
 };
 
-const InstancedCubes = ({ type, cubes, addCube, removeCube, buildMode }: any) => {
+const InstancedCubes = ({ type, cubes, addCube, removeCube, buildMode, playSound }: any) => {
   const meshRef = useRef<InstancedMesh>(null);
   
   useEffect(() => {
@@ -90,6 +103,7 @@ const InstancedCubes = ({ type, cubes, addCube, removeCube, buildMode }: any) =>
         if (e.button === 0 || isTouch) {
           if (e.altKey || buildMode === 'remove') {
             removeCube(cube.pos[0], cube.pos[1], cube.pos[2]);
+            playSound('break');
             return;
           }
 
@@ -100,6 +114,8 @@ const InstancedCubes = ({ type, cubes, addCube, removeCube, buildMode }: any) =>
           else if (clickedFace === 3) addCube(cx, cy - 1, cz);
           else if (clickedFace === 4) addCube(cx, cy, cz + 1);
           else if (clickedFace === 5) addCube(cx, cy, cz - 1);
+          
+          playSound('place');
         }
       }}
     >

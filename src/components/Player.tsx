@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { Vector3, PerspectiveCamera } from 'three';
 import { useKeyboard } from '../hooks/useKeyboard';
 import { useStore } from '../hooks/useStore';
+import { useSounds } from '../hooks/useSounds';
 
 const BASE_JUMP_FORCE = 4;
 const BASE_SPEED = 4;
@@ -12,6 +13,7 @@ export const Player = () => {
   const { camera, gl } = useThree();
   const keyboardActions = useKeyboard();
   const { movement, playerScale, cameraMode } = useStore();
+  const { playSound } = useSounds();
   
   // Combine keyboard and store movement
   const moveForward = keyboardActions.moveForward ? 1 : movement.forward;
@@ -23,6 +25,7 @@ export const Player = () => {
   // Simple physics state
   const velocity = useRef([0, 0, 0]);
   const pos = useRef([0, 1, 10]);
+  const lastStepTime = useRef(0);
   
   // Touch rotation state
   const touchRotation = useRef({ x: 0, y: 0 });
@@ -97,6 +100,16 @@ export const Player = () => {
     const minHeight = 0.1 * playerScale; 
     const cameraOffset = 1.5 * playerScale;
 
+    // Footstep sound
+    const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+    if (isMoving && pos.current[1] <= minHeight + 0.1) {
+      const now = Date.now();
+      if (now - lastStepTime.current > 400) {
+        playSound('click');
+        lastStepTime.current = now;
+      }
+    }
+
     if (pos.current[1] > minHeight) {
       velocity.current[1] -= 9.81 * delta;
     } else {
@@ -104,6 +117,7 @@ export const Player = () => {
       velocity.current[1] = 0;
       if (jump) {
         velocity.current[1] = currentJumpForce;
+        playSound('click'); // Using click as placeholder for jump
       }
     }
     

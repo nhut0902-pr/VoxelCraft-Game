@@ -5,6 +5,7 @@ export type BlockType = 'grass' | 'dirt' | 'log' | 'glass' | 'wood' | 'cobblesto
 export type ControlType = 'dpad' | 'joystick';
 export type MapType = 'plains' | 'desert' | 'forest';
 export type WeatherType = 'clear' | 'rain' | 'storm';
+export type CharacterType = 'steve' | 'alex' | 'robot' | 'ninja' | 'astronaut';
 
 export interface Block {
   id: string;
@@ -28,6 +29,10 @@ interface GameState {
   playerScale: number;
   cameraMode: 'first-person' | 'orbit';
   weather: WeatherType;
+  character: CharacterType;
+  npcCount: number;
+  coins: number;
+  unlockedCharacters: CharacterType[];
   controlSettings: ControlSettings;
   addCube: (x: number, y: number, z: number) => void;
   removeCube: (x: number, y: number, z: number) => void;
@@ -37,6 +42,10 @@ interface GameState {
   setPlayerScale: (scale: number) => void;
   setCameraMode: (mode: 'first-person' | 'orbit') => void;
   setWeather: (weather: WeatherType) => void;
+  setCharacter: (character: CharacterType) => void;
+  setNPCCount: (count: number) => void;
+  addCoins: (amount: number) => void;
+  unlockCharacter: (character: CharacterType) => void;
   setControlSettings: (settings: Partial<ControlSettings>) => void;
   setMapType: (map: MapType) => void;
   saveWorld: () => void;
@@ -63,6 +72,10 @@ export const useStore = create<GameState>((set) => ({
   playerScale: 1,
   cameraMode: 'first-person',
   weather: 'clear',
+  character: getLocalStorage('character') || 'steve',
+  npcCount: getLocalStorage('npcCount') || 3,
+  coins: getLocalStorage('coins') || 100,
+  unlockedCharacters: getLocalStorage('unlockedCharacters') || ['steve', 'alex'],
   controlSettings: getLocalStorage('controlSettings') || {
     type: 'dpad',
     leftPos: { x: 20, y: 40 },
@@ -70,6 +83,10 @@ export const useStore = create<GameState>((set) => ({
   },
   addCube: (x, y, z) => {
     set((state) => {
+      // Prevent overlapping
+      const exists = state.cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z);
+      if (exists) return state;
+
       if (state.inventory[state.texture] <= 0) return state;
       
       const newInventory = { 
@@ -78,8 +95,13 @@ export const useStore = create<GameState>((set) => ({
       };
       setLocalStorage('inventory', newInventory);
 
+      // Reward coins
+      const newCoins = state.coins + 2;
+      setLocalStorage('coins', newCoins);
+
       return {
         inventory: newInventory,
+        coins: newCoins,
         cubes: [
           ...state.cubes,
           {
@@ -132,6 +154,33 @@ export const useStore = create<GameState>((set) => ({
   },
   setWeather: (weather) => {
     set(() => ({ weather }));
+  },
+  setCharacter: (character) => {
+    set(() => {
+      setLocalStorage('character', character);
+      return { character };
+    });
+  },
+  setNPCCount: (count) => {
+    set(() => {
+      setLocalStorage('npcCount', count);
+      return { npcCount: count };
+    });
+  },
+  addCoins: (amount) => {
+    set((state) => {
+      const newCoins = state.coins + amount;
+      setLocalStorage('coins', newCoins);
+      return { coins: newCoins };
+    });
+  },
+  unlockCharacter: (character) => {
+    set((state) => {
+      if (state.unlockedCharacters.includes(character)) return state;
+      const newUnlocked = [...state.unlockedCharacters, character];
+      setLocalStorage('unlockedCharacters', newUnlocked);
+      return { unlockedCharacters: newUnlocked };
+    });
   },
   setControlSettings: (settings) => {
     set((state) => {

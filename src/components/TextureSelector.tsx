@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore, BlockType } from '../hooks/useStore';
 import { useKeyboard } from '../hooks/useKeyboard';
+import { useSounds } from '../hooks/useSounds';
 import { motion } from 'motion/react';
 
 const images: Record<BlockType, string> = {
@@ -21,21 +22,27 @@ export const TextureSelector = () => {
   const activeTexture = useStore((state) => state.texture);
   const setTexture = useStore((state) => state.setTexture);
   const inventory = useStore((state) => state.inventory);
+  const { playSound } = useSounds();
   const { digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0 } = useKeyboard();
 
   useEffect(() => {
     const textures: BlockType[] = Object.keys(images) as BlockType[];
-    if (digit1) setTexture(textures[0]);
-    if (digit2) setTexture(textures[1]);
-    if (digit3) setTexture(textures[2]);
-    if (digit4) setTexture(textures[3]);
-    if (digit5) setTexture(textures[4]);
-    if (digit6) setTexture(textures[5]);
-    if (digit7) setTexture(textures[6]);
-    if (digit8) setTexture(textures[7]);
-    if (digit9) setTexture(textures[8]);
-    if (digit0) setTexture(textures[9]);
-  }, [digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, setTexture]);
+    const setAndPlay = (texture: BlockType) => {
+      setTexture(texture);
+      playSound('click');
+    };
+
+    if (digit1) setAndPlay(textures[0]);
+    if (digit2) setAndPlay(textures[1]);
+    if (digit3) setAndPlay(textures[2]);
+    if (digit4) setAndPlay(textures[3]);
+    if (digit5) setAndPlay(textures[4]);
+    if (digit6) setAndPlay(textures[5]);
+    if (digit7) setAndPlay(textures[6]);
+    if (digit8) setAndPlay(textures[7]);
+    if (digit9) setAndPlay(textures[8]);
+    if (digit0) setAndPlay(textures[9]);
+  }, [digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, setTexture, playSound]);
 
   useEffect(() => {
     // On mobile, keep it visible. On desktop, show for 2s.
@@ -64,7 +71,10 @@ export const TextureSelector = () => {
               ? 'bg-white/20 scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
               : 'hover:bg-white/10'
           }`}
-          onClick={() => setTexture(k)}
+          onClick={() => {
+            setTexture(k);
+            playSound('click');
+          }}
         >
           <span className="text-lg sm:text-2xl group-active:scale-90 transition-transform">{images[k]}</span>
           <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[8px] sm:text-[10px] font-black px-1.5 rounded-full border border-white/20">

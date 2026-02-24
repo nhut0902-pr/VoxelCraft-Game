@@ -17,21 +17,21 @@ export const MapSelection = ({ onSelect }: { onSelect: () => void }) => {
     { 
       id: 'plains' as MapType, 
       name: 'Đồng Bằng', 
-      desc: 'Vùng đất xanh mướt với những tán cây thưa thớt.', 
+      desc: 'Vùng đất rộng lớn với đồi cỏ nhấp nhô và hang động để khám phá.', 
       icon: <Trees className="text-emerald-400" />,
       color: 'from-emerald-500/20 to-emerald-900/40'
     },
     { 
       id: 'desert' as MapType, 
       name: 'Sa Mạc', 
-      desc: 'Cát vàng trải dài và những ốc đảo nhỏ.', 
+      desc: 'Cồn cát cao vút, lý tưởng để xây dựng các công trình kiến trúc đồ sộ.', 
       icon: <Sun className="text-yellow-400" />,
       color: 'from-yellow-500/20 to-yellow-900/40'
     },
     { 
       id: 'forest' as MapType, 
       name: 'Rừng Rậm', 
-      desc: 'Mật độ cây cối dày đặc, lý tưởng để khai thác gỗ.', 
+      desc: 'Địa hình hiểm trở với mật độ cây cối dày đặc và nhiều tầng đất.', 
       icon: <Box className="text-blue-400" />,
       color: 'from-blue-500/20 to-blue-900/40'
     }
