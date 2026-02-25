@@ -1,6 +1,6 @@
 {
-  "name": "VoxelCraft Game",
-  "description": "A 3D voxel-based building game inspired by Minecraft, featuring world exploration, block placement, and first-person controls.",
+  "name": "VoxelCraft Game v2.0.0",
+  "description": "A 3D voxel-based survival and building game. Version 2.0.0 adds Survival stats, Minimap, TNT explosives, NPC interactions, and Achievements.",
   "requestFramePermissions": [
     "microphone"
   ]

@@ -14,7 +14,8 @@ const images: Record<BlockType, string> = {
   water: '💧',
   leaf: '🍃',
   sand: '⏳',
-  brick: '🏠'
+  brick: '🏠',
+  tnt: '🧨'
 };
 
 export const TextureSelector = () => {
@@ -23,7 +24,7 @@ export const TextureSelector = () => {
   const setTexture = useStore((state) => state.setTexture);
   const inventory = useStore((state) => state.inventory);
   const { playSound } = useSounds();
-  const { digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0 } = useKeyboard();
+  const { digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, digitMinus } = useKeyboard();
 
   useEffect(() => {
     const textures: BlockType[] = Object.keys(images) as BlockType[];
@@ -42,7 +43,9 @@ export const TextureSelector = () => {
     if (digit8) setAndPlay(textures[7]);
     if (digit9) setAndPlay(textures[8]);
     if (digit0) setAndPlay(textures[9]);
-  }, [digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, setTexture, playSound]);
+    // @ts-ignore
+    if (digitMinus) setAndPlay(textures[10]);
+  }, [digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, digitMinus, setTexture, playSound]);
 
   useEffect(() => {
     // On mobile, keep it visible. On desktop, show for 2s.

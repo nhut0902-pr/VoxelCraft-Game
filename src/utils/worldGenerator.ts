@@ -48,6 +48,11 @@ export const generateWorld = (mapType: MapType): Block[] => {
         cubes.push({ id: nanoid(), pos: [x, height + 1, z], type: 'log' });
         cubes.push({ id: nanoid(), pos: [x, height + 2, z], type: 'log' });
       }
+
+      // Random TNT
+      if (Math.random() > 0.999) {
+        cubes.push({ id: nanoid(), pos: [x, height + 1, z], type: 'tnt' });
+      }
     }
   }
 

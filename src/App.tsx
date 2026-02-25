@@ -7,21 +7,33 @@ import { MobileControls } from './components/MobileControls';
 import { useStore } from './hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box, Map as MapIcon, Eye, ShoppingBag, Coins } from 'lucide-react';
+import { Maximize2, Minimize2, Save, RotateCcw, X, AlertTriangle, Smartphone, Box, Map as MapIcon, Eye, ShoppingBag, Coins, Star, Heart, User, Trophy } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { LoadingScreen } from './components/LoadingScreen';
 import { MapSelection } from './components/MapSelection';
 import { ShopModal } from './components/ShopModal';
-
+import { Minimap } from './components/Minimap';
+import { SurvivalHUD } from './components/SurvivalHUD';
 import { DayNightCycle } from './components/DayNightCycle';
 
 export default function App() {
   const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, cameraMode, setCameraMode, weather, coins } = useStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showBugNotice, setShowBugNotice] = useState(true);
+  const [showUpdateNotice, setShowUpdateNotice] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showMapSelection, setShowMapSelection] = useState(false);
   const [showShop, setShowShop] = useState(false);
+
+  useEffect(() => {
+    const seen = localStorage.getItem('seen_v2_update');
+    if (seen) setShowUpdateNotice(false);
+  }, []);
+
+  const closeUpdateNotice = () => {
+    setShowUpdateNotice(false);
+    localStorage.setItem('seen_v2_update', 'true');
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -48,6 +60,54 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showUpdateNotice && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6"
+          >
+            <div className="max-w-xl w-full bg-slate-900 border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl">
+              <div className="space-y-4 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                  <Star size={14} /> Bản cập nhật 2.0.0
+                </div>
+                <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Chào mừng đến với Thế giới mới!</h2>
+                <p className="text-white/40 text-sm font-medium leading-relaxed">
+                  Chúng tôi vừa triển khai một loạt tính năng mới để nâng tầm trải nghiệm sinh tồn và sáng tạo của bạn.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { icon: <Heart className="text-red-400" />, title: 'Hệ thống Sinh tồn', desc: 'Theo dõi Máu và Cơn đói để sống sót.' },
+                  { icon: <MapIcon className="text-blue-400" />, title: 'Bản đồ nhỏ (Minimap)', desc: 'Dễ dàng định vị trong thế giới 40x40 rộng lớn.' },
+                  { icon: <Box className="text-orange-400" />, title: 'Khối TNT (Thuốc nổ)', desc: 'Phá hủy địa hình nhanh chóng với sức công phá lớn.' },
+                  { icon: <User className="text-emerald-400" />, title: 'NPC Thông minh', desc: 'Các nhân vật ảo giờ đây có tên và có thể trò chuyện.' },
+                  { icon: <Trophy className="text-yellow-400" />, title: 'Hệ thống Thành tựu', desc: 'Hoàn thành các thử thách để nhận phần thưởng.' },
+                ].map((f, i) => (
+                  <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <div className="p-2 bg-white/5 rounded-xl">{f.icon}</div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-tight">{f.title}</h4>
+                      <p className="text-[10px] text-white/40 font-bold uppercase">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={closeUpdateNotice}
+                className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-blue-500/20"
+              >
+                Bắt đầu khám phá ngay
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showMapSelection && (
           <MapSelection onSelect={() => setShowMapSelection(false)} />
         )}
@@ -65,6 +125,9 @@ export default function App() {
         <Cubes />
         <Ground />
       </Canvas>
+
+      <Minimap />
+      <SurvivalHUD />
 
       {/* Weather UI Indicator */}
       <div className="absolute top-24 left-6 z-50 pointer-events-none">
@@ -129,7 +192,7 @@ export default function App() {
         <div className="bg-white/10 backdrop-blur-xl p-3 rounded-2xl border border-white/20 text-white shadow-2xl pointer-events-auto flex items-center gap-4">
           <div className="flex flex-col">
             <h1 className="text-lg font-black tracking-tighter uppercase leading-none">Voxel</h1>
-            <span className="text-[10px] font-mono opacity-50 tracking-widest uppercase">1.0.0 (beta)</span>
+            <span className="text-[10px] font-mono opacity-50 tracking-widest uppercase">2.0.0 (survival)</span>
           </div>
           
           <div className="h-8 w-[1px] bg-white/20" />

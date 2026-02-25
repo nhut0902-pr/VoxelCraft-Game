@@ -16,6 +16,7 @@ interface KeyboardState {
   digit8: boolean;
   digit9: boolean;
   digit0: boolean;
+  digitMinus: boolean;
 }
 
 export const useKeyboard = () => {
@@ -35,6 +36,7 @@ export const useKeyboard = () => {
     digit8: false,
     digit9: false,
     digit0: false,
+    digitMinus: false,
   });
 
   useEffect(() => {
@@ -90,6 +92,9 @@ export const useKeyboard = () => {
         case 'Digit0':
           setActions((prev) => ({ ...prev, digit0: true }));
           break;
+        case 'Minus':
+          setActions((prev) => ({ ...prev, digitMinus: true }));
+          break;
       }
     };
 
@@ -144,6 +149,9 @@ export const useKeyboard = () => {
           break;
         case 'Digit0':
           setActions((prev) => ({ ...prev, digit0: false }));
+          break;
+        case 'Minus':
+          setActions((prev) => ({ ...prev, digitMinus: false }));
           break;
       }
     };

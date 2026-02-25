@@ -35,35 +35,47 @@ export const DayNightCycle = () => {
     return () => clearInterval(interval);
   }, [setWeather]);
 
-  useFrame(({ clock }: any) => {
-    const time = clock.getElapsedTime() * 0.05;
+  useFrame(({ clock, scene }: any) => {
+    // Slower cycle: 0.01 instead of 0.05
+    const time = clock.getElapsedTime() * 0.01;
     const x = Math.cos(time) * 100;
     const y = Math.sin(time) * 100;
     const z = 20;
 
-    const weatherFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.5 : 0.2;
+    const weatherFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.4 : 0.15;
+    const isNight = y < 0;
 
     if (sunRef.current) {
       sunRef.current.position.set(x, y, z);
       const baseIntensity = Math.max(0, Math.sin(time) * 1.5);
       sunRef.current.intensity = baseIntensity * weatherFactor + thunderFlash;
+      sunRef.current.color.set(y > 5 ? '#ffffff' : '#ff9900'); // Sunset/sunrise color
     }
 
     if (ambientRef.current) {
-      ambientRef.current.intensity = (0.2 + Math.max(0, Math.sin(time) * 0.6)) * weatherFactor;
+      const baseAmbient = isNight ? 0.05 : 0.2;
+      ambientRef.current.intensity = (baseAmbient + Math.max(0, Math.sin(time) * 0.4)) * weatherFactor;
+    }
+
+    // Fog logic
+    if (scene.fog) {
+      const fogColor = isNight ? '#050505' : (weather === 'clear' ? '#87ceeb' : '#444444');
+      (scene.fog as THREE.Fog).color.set(fogColor);
+      (scene.fog as THREE.Fog).near = weather === 'clear' ? 10 : 2;
+      (scene.fog as THREE.Fog).far = weather === 'clear' ? 100 : 30;
     }
 
     // Thunder logic
-    if (weather === 'storm' && Math.random() > 0.99) {
-      setThunderFlash(2);
-      setTimeout(() => setThunderFlash(0), 100 + Math.random() * 200);
+    if (weather === 'storm' && Math.random() > 0.995) {
+      setThunderFlash(3);
+      setTimeout(() => setThunderFlash(0), 50 + Math.random() * 150);
     }
 
     // Rain animation
     if (rainRef.current && (weather === 'rain' || weather === 'storm')) {
       const positions = rainRef.current.geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < rainCount; i++) {
-        positions[i * 3 + 1] -= 0.5; // Rain speed
+        positions[i * 3 + 1] -= 0.8; // Faster rain
         if (positions[i * 3 + 1] < -5) {
           positions[i * 3 + 1] = 45;
         }
@@ -75,23 +87,24 @@ export const DayNightCycle = () => {
   const [sunPos, setSunPos] = useState<[number, number, number]>([100, 10, 20]);
   
   useFrame(({ clock }) => {
-    const time = clock.getElapsedTime() * 0.05;
+    const time = clock.getElapsedTime() * 0.01;
     const x = Math.cos(time) * 100;
     const y = Math.sin(time) * 100;
     const z = 20;
     
-    if (clock.getElapsedTime() % 0.2 < 0.02) {
+    if (clock.getElapsedTime() % 0.5 < 0.02) {
       setSunPos([x, y, z]);
     }
   });
 
   return (
     <>
+      <fog attach="fog" args={['#87ceeb', 10, 100]} />
       <Sky 
         sunPosition={sunPos} 
-        turbidity={weather === 'clear' ? 10 : 20}
-        rayleigh={weather === 'clear' ? 3 : 0.5}
-        mieCoefficient={weather === 'clear' ? 0.005 : 0.1}
+        turbidity={weather === 'clear' ? 10 : 40}
+        rayleigh={weather === 'clear' ? 3 : 0.2}
+        mieCoefficient={weather === 'clear' ? 0.005 : 0.2}
         mieDirectionalG={0.8}
       />
       <Stars 

@@ -1,7 +1,8 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, Group } from 'three';
 import { useStore, CharacterType } from '../hooks/useStore';
+import { Html } from '@react-three/drei';
 
 export const Animal = ({ position }: { position: [number, number, number] }) => {
   const meshRef = useRef<Group>(null);
@@ -12,6 +13,24 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
   const npcType = useMemo(() => {
     const types: CharacterType[] = ['steve', 'alex', 'robot', 'ninja', 'astronaut'];
     return types[Math.floor(Math.random() * types.length)];
+  }, []);
+
+  const npcName = useMemo(() => {
+    const names = ['Miner Tom', 'Builder Bob', 'Explorer Sam', 'Farmer Joe', 'Crafty Sue'];
+    return names[Math.floor(Math.random() * names.length)];
+  }, []);
+
+  const [chat, setChat] = useState('');
+
+  useEffect(() => {
+    const chatInterval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        const messages = ['Hello!', 'Nice day!', 'Building something?', 'Watch out for TNT!', 'I love this world.'];
+        setChat(messages[Math.floor(Math.random() * messages.length)]);
+        setTimeout(() => setChat(''), 3000);
+      }
+    }, 10000);
+    return () => clearInterval(chatInterval);
   }, []);
 
   const colors = {
@@ -35,10 +54,13 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
 
+    const { weather } = useStore.getState();
+    const weatherSpeedFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.6 : 0.3;
+    
     // Move towards target
     const dir = new Vector3().subVectors(targetPos.current, currentPos.current);
     if (dir.length() > 0.1) {
-      dir.normalize().multiplyScalar(2 * delta); // Slightly faster
+      dir.normalize().multiplyScalar(2 * delta * weatherSpeedFactor); 
       currentPos.current.add(dir);
       meshRef.current.position.copy(currentPos.current);
 
@@ -47,12 +69,24 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
       meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, angle, 0.1);
     }
     
-    // Bobbing animation
-    meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 5) * 0.05;
+    // Bobbing animation - slower in bad weather
+    meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 5 * weatherSpeedFactor) * 0.05;
   });
 
   return (
     <group ref={meshRef} position={position}>
+      <Html position={[0, 1.6, 0]} center distanceFactor={10}>
+        <div className="flex flex-col items-center gap-1 pointer-events-none">
+          {chat && (
+            <div className="bg-white text-slate-900 px-2 py-1 rounded-lg text-[8px] font-bold shadow-lg animate-bounce whitespace-nowrap">
+              {chat}
+            </div>
+          )}
+          <div className="bg-black/60 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter whitespace-nowrap border border-white/20">
+            {npcName}
+          </div>
+        </div>
+      </Html>
       {/* Body */}
       <mesh position={[0, 0.5, 0]}>
         <boxGeometry args={[0.6, 0.8, 0.4]} />

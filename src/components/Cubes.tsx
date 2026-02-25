@@ -16,6 +16,7 @@ const blockColors: Record<BlockType, string> = {
   leaf: '#2e7d32',
   sand: '#fbc02d',
   brick: '#d32f2f',
+  tnt: '#ff0000',
 };
 
 const tempObject = new Object3D();
