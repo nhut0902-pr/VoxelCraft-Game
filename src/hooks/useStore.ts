@@ -41,6 +41,9 @@ export interface GameState {
   coins: number;
   health: number;
   hunger: number;
+  gameTime: number;
+  playerPos: [number, number, number];
+  playerRotation: [number, number, number];
   achievements: Achievement[];
   unlockedCharacters: CharacterType[];
   controlSettings: ControlSettings;
@@ -57,6 +60,9 @@ export interface GameState {
   setNPCCount: (count: number) => void;
   addCoins: (amount: number) => void;
   updateStats: (healthDelta: number, hungerDelta: number) => void;
+  setGameTime: (time: number) => void;
+  setPlayerPos: (pos: [number, number, number]) => void;
+  setPlayerRotation: (rotation: [number, number, number]) => void;
   unlockCharacter: (character: CharacterType) => void;
   checkAchievements: () => void;
   setControlSettings: (settings: Partial<ControlSettings>) => void;
@@ -96,6 +102,9 @@ export const useStore = create<GameState>((set) => ({
   coins: getLocalStorage('coins') || 100,
   health: 100,
   hunger: 100,
+  gameTime: 0,
+  playerPos: [0, 0, 0],
+  playerRotation: [0, 0, 0],
   achievements: getLocalStorage('achievements') || INITIAL_ACHIEVEMENTS,
   unlockedCharacters: getLocalStorage('unlockedCharacters') || ['steve', 'alex'],
   controlSettings: getLocalStorage('controlSettings') || {
@@ -224,6 +233,9 @@ export const useStore = create<GameState>((set) => ({
       hunger: Math.max(0, Math.min(100, state.hunger + hungerDelta)),
     }));
   },
+  setGameTime: (time) => set({ gameTime: time }),
+  setPlayerPos: (pos) => set({ playerPos: pos }),
+  setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
   unlockCharacter: (character) => {
     set((state) => {
       if (state.unlockedCharacters.includes(character)) return state;

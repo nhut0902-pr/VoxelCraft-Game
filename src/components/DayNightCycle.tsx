@@ -9,8 +9,9 @@ export const DayNightCycle = () => {
   const ambientRef = useRef<THREE.AmbientLight>(null);
   const skyRef = useRef<any>(null);
   const rainRef = useRef<THREE.Points>(null);
-  const { weather, setWeather } = useStore();
+  const { weather, setWeather, gameTime, setGameTime } = useStore();
   const [thunderFlash, setThunderFlash] = useState(0);
+  const lastTimeRef = useRef(0);
 
   // Rain particles
   const rainCount = 5000;
@@ -24,42 +25,44 @@ export const DayNightCycle = () => {
     return positions;
   }, []);
 
-  // Weather cycle
-  useEffect(() => {
-    const interval = setInterval(() => {
+  useFrame(({ scene }: any, delta: number) => {
+    // Update game time
+    const isNight = Math.sin(gameTime) < 0;
+    const timeSpeed = isNight ? 0.005 : 0.015; // Night is 3x slower than day
+    const newTime = gameTime + delta * timeSpeed;
+    
+    // Weather change logic at sunrise
+    if (Math.sin(gameTime) < 0 && Math.sin(newTime) >= 0) {
       const rand = Math.random();
       if (rand < 0.6) setWeather('clear');
       else if (rand < 0.9) setWeather('rain');
       else setWeather('storm');
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [setWeather]);
+    }
+    
+    setGameTime(newTime);
 
-  useFrame(({ clock, scene }: any) => {
-    // Slower cycle: 0.01 instead of 0.05
-    const time = clock.getElapsedTime() * 0.01;
-    const x = Math.cos(time) * 100;
-    const y = Math.sin(time) * 100;
+    const x = Math.cos(newTime) * 100;
+    const y = Math.sin(newTime) * 100;
     const z = 20;
 
     const weatherFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.4 : 0.15;
-    const isNight = y < 0;
 
     if (sunRef.current) {
       sunRef.current.position.set(x, y, z);
-      const baseIntensity = Math.max(0, Math.sin(time) * 1.5);
+      const baseIntensity = Math.max(0, Math.sin(newTime) * 1.5);
       sunRef.current.intensity = baseIntensity * weatherFactor + thunderFlash;
       sunRef.current.color.set(y > 5 ? '#ffffff' : '#ff9900'); // Sunset/sunrise color
     }
 
     if (ambientRef.current) {
-      const baseAmbient = isNight ? 0.05 : 0.2;
-      ambientRef.current.intensity = (baseAmbient + Math.max(0, Math.sin(time) * 0.4)) * weatherFactor;
+      // Increased base ambient at night to avoid "too dark" issue
+      const baseAmbient = isNight ? 0.15 : 0.3; 
+      ambientRef.current.intensity = (baseAmbient + Math.max(0, Math.sin(newTime) * 0.4)) * weatherFactor;
     }
 
     // Fog logic
     if (scene.fog) {
-      const fogColor = isNight ? '#050505' : (weather === 'clear' ? '#87ceeb' : '#444444');
+      const fogColor = isNight ? '#020205' : (weather === 'clear' ? '#87ceeb' : '#444444');
       (scene.fog as THREE.Fog).color.set(fogColor);
       (scene.fog as THREE.Fog).near = weather === 'clear' ? 10 : 2;
       (scene.fog as THREE.Fog).far = weather === 'clear' ? 100 : 30;
@@ -86,16 +89,14 @@ export const DayNightCycle = () => {
 
   const [sunPos, setSunPos] = useState<[number, number, number]>([100, 10, 20]);
   
-  useFrame(({ clock }) => {
-    const time = clock.getElapsedTime() * 0.01;
-    const x = Math.cos(time) * 100;
-    const y = Math.sin(time) * 100;
-    const z = 20;
-    
-    if (clock.getElapsedTime() % 0.5 < 0.02) {
-      setSunPos([x, y, z]);
-    }
-  });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const x = Math.cos(gameTime) * 100;
+      const y = Math.sin(gameTime) * 100;
+      setSunPos([x, y, 20]);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [gameTime]);
 
   return (
     <>
