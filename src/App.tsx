@@ -26,8 +26,10 @@ export default function App() {
   const [showShop, setShowShop] = useState(false);
 
   useEffect(() => {
+    // Check if user has seen update notice
     const seen = localStorage.getItem('seen_v2_update');
     if (seen) setShowUpdateNotice(false);
+    else setShowUpdateNotice(false); // Default to false, show after loading
   }, []);
 
   const closeUpdateNotice = () => {
@@ -48,6 +50,9 @@ export default function App() {
 
   const handleLoadingFinished = () => {
     setIsLoading(false);
+    const seen = localStorage.getItem('seen_v2_update');
+    if (!seen) setShowUpdateNotice(true);
+    
     if (cubes.length === 0) {
       setShowMapSelection(true);
     }
@@ -60,12 +65,12 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showUpdateNotice && (
+        {!isLoading && showUpdateNotice && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6"
+            className="fixed inset-0 z-[1100] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6 pointer-events-auto"
           >
             <div className="max-w-xl w-full bg-slate-900 border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl">
               <div className="space-y-4 text-center">

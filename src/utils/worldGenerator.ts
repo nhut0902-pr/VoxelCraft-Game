@@ -3,7 +3,7 @@ import { Block, BlockType, MapType } from '../hooks/useStore';
 
 export const generateWorld = (mapType: MapType): Block[] => {
   const cubes: Block[] = [];
-  const size = 40; // Increased size from 20 to 40
+  const size = 30; // Reduced from 40 to 30 for better performance
   const baseHeight = 3;
 
   const getNoise = (x: number, z: number, scale: number, amplitude: number) => {

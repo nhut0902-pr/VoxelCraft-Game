@@ -43,7 +43,7 @@ export const LoadingScreen = ({ onFinished }: { onFinished: () => void }) => {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col items-center justify-center overflow-hidden"
     >
       {/* Background Particles Effect */}
       <div className="absolute inset-0 opacity-20">
@@ -121,6 +121,17 @@ export const LoadingScreen = ({ onFinished }: { onFinished: () => void }) => {
             style={{ width: `${progress}%` }}
           />
         </div>
+
+        {progress > 50 && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={onFinished}
+            className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 transition-all pointer-events-auto"
+          >
+            Bỏ qua tải dữ liệu
+          </motion.button>
+        )}
         
         <div className="flex items-center gap-2 text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">
           <Globe size={12} />

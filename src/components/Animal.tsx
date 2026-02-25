@@ -51,8 +51,16 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
     return () => clearInterval(interval);
   }, [position]);
 
+  const [isClose, setIsClose] = useState(false);
+
   useFrame((state, delta) => {
     if (!meshRef.current) return;
+
+    const distToPlayer = currentPos.current.distanceTo(state.camera.position);
+    const isVisible = distToPlayer < 35;
+    const closeEnough = distToPlayer < 12;
+
+    if (isClose !== closeEnough) setIsClose(closeEnough);
 
     const { weather } = useStore.getState();
     const weatherSpeedFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.6 : 0.3;
@@ -69,24 +77,28 @@ export const Animal = ({ position }: { position: [number, number, number] }) => 
       meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, angle, 0.1);
     }
     
-    // Bobbing animation - slower in bad weather
+    // Bobbing animation
     meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 5 * weatherSpeedFactor) * 0.05;
+    
+    meshRef.current.visible = isVisible;
   });
 
   return (
     <group ref={meshRef} position={position}>
-      <Html position={[0, 1.6, 0]} center distanceFactor={10}>
-        <div className="flex flex-col items-center gap-1 pointer-events-none">
-          {chat && (
-            <div className="bg-white text-slate-900 px-2 py-1 rounded-lg text-[8px] font-bold shadow-lg animate-bounce whitespace-nowrap">
-              {chat}
+      {(isClose || chat) && (
+        <Html position={[0, 1.6, 0]} center distanceFactor={10}>
+          <div className="flex flex-col items-center gap-1 pointer-events-none">
+            {chat && (
+              <div className="bg-white text-slate-900 px-2 py-1 rounded-lg text-[8px] font-bold shadow-lg animate-bounce whitespace-nowrap">
+                {chat}
+              </div>
+            )}
+            <div className="bg-black/60 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter whitespace-nowrap border border-white/20">
+              {npcName}
             </div>
-          )}
-          <div className="bg-black/60 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter whitespace-nowrap border border-white/20">
-            {npcName}
           </div>
-        </div>
-      </Html>
+        </Html>
+      )}
       {/* Body */}
       <mesh position={[0, 0.5, 0]}>
         <boxGeometry args={[0.6, 0.8, 0.4]} />
