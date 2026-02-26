@@ -7,13 +7,13 @@ import { useKeyboard } from '../hooks/useKeyboard';
 import { useStore } from '../hooks/useStore';
 import { useSounds } from '../hooks/useSounds';
 
-const BASE_JUMP_FORCE = 4;
-const BASE_SPEED = 4;
+const BASE_JUMP_FORCE = 4.5;
+const BASE_SPEED = 6;
 
 export const Player = () => {
   const { camera, gl } = useThree();
   const keyboardActions = useKeyboard();
-  const { movement, playerScale, cameraMode, setPlayerPos, setPlayerRotation, weather } = useStore();
+  const { movement, playerScale, cameraMode, setPlayerPos, setPlayerRotation, weather, playerPos } = useStore();
   const { playSound } = useSounds();
   
   // Combine keyboard and store movement
@@ -25,7 +25,7 @@ export const Player = () => {
 
   // Simple physics state
   const velocity = useRef([0, 0, 0]);
-  const pos = useRef([0, 1, 10]);
+  const pos = useRef(playerPos);
   const lastStepTime = useRef(0);
   const flashLightRef = useRef<THREE.SpotLight>(null);
   
@@ -87,9 +87,6 @@ export const Player = () => {
     }
 
     const direction = new Vector3();
-    const frontVector = new Vector3(0, 0, moveBackward - moveForward);
-    const sideVector = new Vector3(moveLeft - moveRight, 0, 0);
-
     const isMoving = moveForward !== 0 || moveBackward !== 0 || moveLeft !== 0 || moveRight !== 0;
 
     if (isMoving) {
@@ -98,13 +95,13 @@ export const Player = () => {
         (moveLeft - moveRight) ** 2
       );
 
-      direction
-        .subVectors(frontVector, sideVector)
-        .normalize()
-        .multiplyScalar(currentSpeed * Math.min(inputMagnitude, 1))
-        .applyEuler(camera.rotation);
+      // Get forward and right vectors based on camera yaw
+      const forward = new Vector3(0, 0, -1).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
+      const right = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
       
-      direction.y = 0;
+      direction.addScaledVector(forward, moveForward - moveBackward);
+      direction.addScaledVector(right, moveRight - moveLeft);
+      direction.normalize().multiplyScalar(currentSpeed * Math.min(inputMagnitude, 1));
     }
 
     // Collision Detection
@@ -116,7 +113,7 @@ export const Player = () => {
       
       // Check blocks in a 3x3x3 area around the player
       for (let x = px - 1; x <= px + 1; x++) {
-        for (let y = py; y <= py + 2; y++) {
+        for (let y = py - 1; y <= py + 2; y++) {
           for (let z = pz - 1; z <= pz + 1; z++) {
             const hasCube = cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z && c.type !== 'water');
             if (hasCube) {
@@ -127,13 +124,13 @@ export const Player = () => {
               const cMinZ = z - 0.5;
               const cMaxZ = z + 0.5;
               
-              // Player bounding box (lenient)
-              const pMinX = nextX - 0.25;
-              const pMaxX = nextX + 0.25;
-              const pMinY = nextY + 0.1; 
-              const pMaxY = nextY + 1.6; 
-              const pMinZ = nextZ - 0.25;
-              const pMaxZ = nextZ + 0.25;
+              // Player bounding box (thinner to avoid snagging)
+              const pMinX = nextX - 0.2;
+              const pMaxX = nextX + 0.2;
+              const pMinY = nextY + 0.2; // Start higher above feet to avoid floor collision
+              const pMaxY = nextY + 1.5; // End below head to avoid ceiling snagging
+              const pMinZ = nextZ - 0.2;
+              const pMaxZ = nextZ + 0.2;
 
               if (pMinX < cMaxX && pMaxX > cMinX &&
                   pMinY < cMaxY && pMaxY > cMinY &&
@@ -147,9 +144,9 @@ export const Player = () => {
       return false;
     };
 
-    // Unstuck logic: if currently colliding, push up
+    // Unstuck logic: only push up if deeply colliding
     if (checkCollision(pos.current[0], pos.current[1], pos.current[2])) {
-      pos.current[1] += 0.1;
+      pos.current[1] += 0.05;
     }
 
     if (isMoving) {

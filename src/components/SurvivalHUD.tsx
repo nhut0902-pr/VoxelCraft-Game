@@ -1,11 +1,16 @@
 import { useStore } from '../hooks/useStore';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Utensils, Trophy, Star } from 'lucide-react';
+import { Heart, Utensils, Trophy, Star, RotateCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const SurvivalHUD = () => {
-  const { health, hunger, achievements, updateStats } = useStore();
+  const { health, hunger, achievements, updateStats, setPlayerPos } = useStore();
   const [showAchievements, setShowAchievements] = useState(false);
+
+  const handleResetPos = () => {
+    setPlayerPos([0, 10, 0]);
+    window.location.reload(); // Force reload to sync refs
+  };
 
   // Survival logic: hunger decreases over time
   useEffect(() => {
@@ -69,6 +74,17 @@ export const SurvivalHUD = () => {
         </div>
         <Star className={`text-yellow-500 transition-transform ${showAchievements ? 'rotate-180' : ''}`} size={14} />
       </div>
+
+      {/* Reset Position Button */}
+      <button 
+        onClick={handleResetPos}
+        className="bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 w-48 flex items-center gap-3 pointer-events-auto cursor-pointer hover:bg-white/5 transition-colors text-white/60"
+      >
+        <div className="bg-blue-500/20 p-1.5 rounded-lg">
+          <RotateCcw size={16} className="text-blue-400" />
+        </div>
+        <span className="text-[10px] font-black uppercase tracking-tight">Kẹt? Reset vị trí</span>
+      </button>
 
       <AnimatePresence>
         {showAchievements && (
