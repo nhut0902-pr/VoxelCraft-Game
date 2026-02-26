@@ -15,6 +15,7 @@ import { ShopModal } from './components/ShopModal';
 import { Minimap } from './components/Minimap';
 import { SurvivalHUD } from './components/SurvivalHUD';
 import { DayNightCycle } from './components/DayNightCycle';
+import { Explosions } from './components/Explosions';
 
 export default function App() {
   const { saveWorld, resetWorld, playerScale, setPlayerScale, cubes, cameraMode, setCameraMode, weather, coins } = useStore();
@@ -129,6 +130,7 @@ export default function App() {
 
       <Canvas shadows camera={{ fov: 45 }}>
         <DayNightCycle />
+        <Explosions />
         <Player />
         <Cubes />
         <Ground />

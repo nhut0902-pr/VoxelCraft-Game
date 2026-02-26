@@ -47,6 +47,7 @@ export interface GameState {
   achievements: Achievement[];
   unlockedCharacters: CharacterType[];
   controlSettings: ControlSettings;
+  explosions: { id: string, pos: [number, number, number] }[];
   addCube: (x: number, y: number, z: number) => void;
   removeCube: (x: number, y: number, z: number) => void;
   explodeTNT: (x: number, y: number, z: number) => void;
@@ -69,6 +70,7 @@ export interface GameState {
   setMapType: (map: MapType) => void;
   saveWorld: () => void;
   resetWorld: () => void;
+  removeExplosion: (id: string) => void;
 }
 
 const INITIAL_INVENTORY: Record<BlockType, number> = {
@@ -105,6 +107,7 @@ export const useStore = create<GameState>((set) => ({
   gameTime: 0,
   playerPos: [0, 0, 0],
   playerRotation: [0, 0, 0],
+  explosions: [],
   achievements: getLocalStorage('achievements') || INITIAL_ACHIEVEMENTS,
   unlockedCharacters: getLocalStorage('unlockedCharacters') || ['steve', 'alex'],
   controlSettings: getLocalStorage('controlSettings') || {
@@ -179,15 +182,32 @@ export const useStore = create<GameState>((set) => ({
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2565/2565-preview.mp3');
     audio.volume = 0.6;
     audio.play().catch(() => {});
+    
+    const explosionId = nanoid();
+    
     set((state) => {
-      const radius = 3;
+      const radius = 4; // Increased radius slightly
       const newCubes = state.cubes.filter(cube => {
         const [cx, cy, cz] = cube.pos;
         const dist = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2 + (cz - z) ** 2);
         return dist > radius;
       });
-      return { cubes: newCubes };
+      
+      return { 
+        cubes: newCubes,
+        explosions: [...state.explosions, { id: explosionId, pos: [x, y, z] }]
+      };
     });
+
+    // Auto remove explosion after 2 seconds
+    setTimeout(() => {
+      useStore.getState().removeExplosion(explosionId);
+    }, 2000);
+  },
+  removeExplosion: (id) => {
+    set((state) => ({
+      explosions: state.explosions.filter(e => e.id !== id)
+    }));
   },
   setTexture: (texture) => {
     set(() => ({

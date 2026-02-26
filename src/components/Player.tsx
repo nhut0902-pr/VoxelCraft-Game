@@ -90,30 +90,33 @@ export const Player = () => {
     const frontVector = new Vector3(0, 0, moveBackward - moveForward);
     const sideVector = new Vector3(moveLeft - moveRight, 0, 0);
 
-    const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+    const isMoving = moveForward !== 0 || moveBackward !== 0 || moveLeft !== 0 || moveRight !== 0;
 
     if (isMoving) {
+      const inputMagnitude = Math.sqrt(
+        (moveBackward - moveForward) ** 2 + 
+        (moveLeft - moveRight) ** 2
+      );
+
       direction
         .subVectors(frontVector, sideVector)
         .normalize()
-        .multiplyScalar(currentSpeed)
+        .multiplyScalar(currentSpeed * Math.min(inputMagnitude, 1))
         .applyEuler(camera.rotation);
       
-      // We only care about horizontal movement for this part
       direction.y = 0;
     }
 
     // Collision Detection
     const cubes = useStore.getState().cubes;
     const checkCollision = (nextX: number, nextY: number, nextZ: number) => {
-      const px = Math.round(nextX);
-      const py = Math.round(nextY);
-      const pz = Math.round(nextZ);
+      const px = Math.floor(nextX + 0.5);
+      const py = Math.floor(nextY + 0.5);
+      const pz = Math.floor(nextZ + 0.5);
       
-      // Check a small volume around the player's body (not feet)
-      // Player height is ~1.7. We check from y+0.1 to y+1.6
+      // Check blocks in a 3x3x3 area around the player
       for (let x = px - 1; x <= px + 1; x++) {
-        for (let y = py; y <= py + 1; y++) {
+        for (let y = py; y <= py + 2; y++) {
           for (let z = pz - 1; z <= pz + 1; z++) {
             const hasCube = cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z && c.type !== 'water');
             if (hasCube) {
@@ -124,13 +127,13 @@ export const Player = () => {
               const cMinZ = z - 0.5;
               const cMaxZ = z + 0.5;
               
-              // Player box for horizontal collision (slightly smaller than full height to avoid floor/ceiling snags)
-              const pMinX = nextX - 0.3;
-              const pMaxX = nextX + 0.3;
-              const pMinY = nextY + 0.1; // Start above feet
-              const pMaxY = nextY + 1.6; // End below full height
-              const pMinZ = nextZ - 0.3;
-              const pMaxZ = nextZ + 0.3;
+              // Player bounding box (lenient)
+              const pMinX = nextX - 0.25;
+              const pMaxX = nextX + 0.25;
+              const pMinY = nextY + 0.1; 
+              const pMaxY = nextY + 1.6; 
+              const pMinZ = nextZ - 0.25;
+              const pMaxZ = nextZ + 0.25;
 
               if (pMinX < cMaxX && pMaxX > cMinX &&
                   pMinY < cMaxY && pMaxY > cMinY &&
@@ -143,6 +146,11 @@ export const Player = () => {
       }
       return false;
     };
+
+    // Unstuck logic: if currently colliding, push up
+    if (checkCollision(pos.current[0], pos.current[1], pos.current[2])) {
+      pos.current[1] += 0.1;
+    }
 
     if (isMoving) {
       // Try moving X
@@ -166,9 +174,9 @@ export const Player = () => {
       return cubes.find(c => c.pos[0] === rx && c.pos[1] === ry && c.pos[2] === rz && c.type !== 'water');
     };
 
-    const minHeight = -2.0; // Bedrock level
+    const minHeight = -2.0; 
     const footY = pos.current[1];
-    const blockBelow = getBlockAt(pos.current[0], footY - 0.1, pos.current[2]);
+    const blockBelow = getBlockAt(pos.current[0], footY - 0.05, pos.current[2]);
     const groundY = blockBelow ? blockBelow.pos[1] + 0.5 : minHeight;
 
     if (pos.current[1] > groundY + 0.01) {
@@ -185,10 +193,10 @@ export const Player = () => {
     pos.current[1] += velocity.current[1] * delta;
 
     // Prevent jumping through blocks above
-    const blockAbove = getBlockAt(pos.current[0], pos.current[1] + 1.8, pos.current[2]);
+    const blockAbove = getBlockAt(pos.current[0], pos.current[1] + 1.7, pos.current[2]);
     if (blockAbove && velocity.current[1] > 0) {
       velocity.current[1] = 0;
-      pos.current[1] = blockAbove.pos[1] - 2.3;
+      pos.current[1] = blockAbove.pos[1] - 2.2;
     }
 
     const cameraOffset = 1.5 * playerScale;
