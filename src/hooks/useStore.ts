@@ -113,10 +113,13 @@ export const useStore = create<GameState>((set) => ({
     rightPos: { x: 20, y: 40 },
   },
   addCube: (x, y, z) => {
+    let isTNT = false;
     set((state) => {
       // Prevent overlapping
       const exists = state.cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z);
       if (exists) return state;
+
+      isTNT = state.texture === 'tnt';
 
       const newInventory = { 
         ...state.inventory, 
@@ -137,19 +140,19 @@ export const useStore = create<GameState>((set) => ({
         },
       ];
 
-      // Check for TNT placement
-      if (state.texture === 'tnt') {
-        setTimeout(() => {
-          useStore.getState().explodeTNT(x, y, z);
-        }, 3000);
-      }
-
       return {
         inventory: newInventory,
         coins: newCoins,
         cubes: newCubes,
       };
     });
+
+    if (isTNT) {
+      setTimeout(() => {
+        useStore.getState().explodeTNT(x, y, z);
+      }, 3000);
+    }
+
     useStore.getState().checkAchievements();
   },
   removeCube: (x, y, z) => {
@@ -173,6 +176,9 @@ export const useStore = create<GameState>((set) => ({
     });
   },
   explodeTNT: (x, y, z) => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2565/2565-preview.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
     set((state) => {
       const radius = 3;
       const newCubes = state.cubes.filter(cube => {

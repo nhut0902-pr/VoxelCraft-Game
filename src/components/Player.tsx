@@ -159,7 +159,7 @@ export const Player = () => {
     const blockBelow = getBlockAt(pos.current[0], footY - 0.1, pos.current[2]);
     const groundY = blockBelow ? blockBelow.pos[1] + 0.5 : minHeight;
 
-    if (pos.current[1] > groundY) {
+    if (pos.current[1] > groundY + 0.01) {
       velocity.current[1] -= 9.81 * delta;
     } else {
       pos.current[1] = groundY;

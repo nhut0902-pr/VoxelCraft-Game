@@ -4,6 +4,7 @@ const SOUNDS = {
   place: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
   break: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
   click: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
+  explosion: 'https://assets.mixkit.co/active_storage/sfx/2565/2565-preview.mp3',
 };
 
 export const useSounds = () => {
