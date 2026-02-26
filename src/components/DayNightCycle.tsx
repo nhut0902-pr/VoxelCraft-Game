@@ -26,38 +26,37 @@ export const DayNightCycle = () => {
   }, []);
 
   useFrame(({ scene }: any, delta: number) => {
-    // Update game time
-    const isNight = Math.sin(gameTime) < 0;
-    const timeSpeed = isNight ? 0.005 : 0.015; // Night is 3x slower than day
-    const newTime = gameTime + delta * timeSpeed;
+    // Fixed game time for permanent daylight
+    const fixedDayTime = Math.PI / 2.5; // Bright daylight
+    const isNight = false;
     
-    // Weather change logic at sunrise
-    if (Math.sin(gameTime) < 0 && Math.sin(newTime) >= 0) {
+    // Weather change logic (simplified since it's always day)
+    if (Math.random() > 0.999) {
       const rand = Math.random();
-      if (rand < 0.6) setWeather('clear');
-      else if (rand < 0.9) setWeather('rain');
+      if (rand < 0.8) setWeather('clear');
+      else if (rand < 0.95) setWeather('rain');
       else setWeather('storm');
     }
     
-    setGameTime(newTime);
+    // We don't update gameTime anymore to keep it fixed
+    // setGameTime(newTime);
 
-    const x = Math.cos(newTime) * 100;
-    const y = Math.sin(newTime) * 100;
+    const x = Math.cos(fixedDayTime) * 100;
+    const y = Math.sin(fixedDayTime) * 100;
     const z = 20;
 
     const weatherFactor = weather === 'clear' ? 1 : weather === 'rain' ? 0.4 : 0.15;
 
     if (sunRef.current) {
       sunRef.current.position.set(x, y, z);
-      const baseIntensity = Math.max(0, Math.sin(newTime) * 1.5);
+      const baseIntensity = Math.max(0, Math.sin(fixedDayTime) * 1.5);
       sunRef.current.intensity = baseIntensity * weatherFactor + thunderFlash;
-      sunRef.current.color.set(y > 5 ? '#ffffff' : '#ff9900'); // Sunset/sunrise color
+      sunRef.current.color.set(y > 5 ? '#ffffff' : '#ff9900'); 
     }
 
     if (ambientRef.current) {
-      // Increased base ambient at night to avoid "too dark" issue
-      const baseAmbient = isNight ? 0.15 : 0.3; 
-      ambientRef.current.intensity = (baseAmbient + Math.max(0, Math.sin(newTime) * 0.4)) * weatherFactor;
+      const baseAmbient = 0.4; 
+      ambientRef.current.intensity = (baseAmbient + Math.max(0, Math.sin(fixedDayTime) * 0.4)) * weatherFactor;
     }
 
     // Fog logic

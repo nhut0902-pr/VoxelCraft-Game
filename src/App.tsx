@@ -66,57 +66,6 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {!isLoading && showUpdateNotice && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed inset-0 z-[1100] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6 pointer-events-auto"
-          >
-            <div className="max-w-xl w-full bg-slate-900 border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl">
-              <div className="space-y-4 text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                  <Star size={14} /> Bản cập nhật 2.0.0
-                </div>
-                <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Chào mừng đến với Thế giới mới!</h2>
-                <p className="text-white/40 text-sm font-medium leading-relaxed">
-                  Chúng tôi vừa triển khai một loạt tính năng mới để nâng tầm trải nghiệm sinh tồn và sáng tạo của bạn.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { icon: <Heart className="text-red-400" />, title: 'Sinh tồn', desc: 'Máu & Cơn đói.', img: 'https://picsum.photos/seed/survival/400/200' },
-                  { icon: <MapIcon className="text-blue-400" />, title: 'Minimap', desc: 'Radar định vị.', img: 'https://picsum.photos/seed/map/400/200' },
-                  { icon: <Box className="text-orange-400" />, title: 'TNT', desc: 'Thuốc nổ mạnh.', img: 'https://picsum.photos/seed/tnt/400/200' },
-                  { icon: <User className="text-emerald-400" />, title: 'NPC', desc: 'Nhân vật ảo.', img: 'https://picsum.photos/seed/npc/400/200' },
-                ].map((f, i) => (
-                  <div key={i} className="group relative h-24 rounded-2xl border border-white/10 overflow-hidden">
-                    <img src={f.img} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity" referrerPolicy="no-referrer" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
-                    <div className="relative h-full p-4 flex items-center gap-3">
-                      <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md">{f.icon}</div>
-                      <div>
-                        <h4 className="text-[10px] font-black text-white uppercase tracking-tighter">{f.title}</h4>
-                        <p className="text-[8px] text-white/40 font-bold uppercase">{f.desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button 
-                onClick={closeUpdateNotice}
-                className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-blue-500/20"
-              >
-                Bắt đầu khám phá ngay
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
         {showMapSelection && (
           <MapSelection onSelect={() => setShowMapSelection(false)} />
         )}

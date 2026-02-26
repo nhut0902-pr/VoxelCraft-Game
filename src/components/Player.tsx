@@ -1,6 +1,6 @@
 import { useThree, useFrame } from '@react-three/fiber';
 import { PointerLockControls, OrbitControls } from '@react-three/drei';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { Vector3, PerspectiveCamera, Object3D, SpotLight } from 'three';
 import * as THREE from 'three';
 import { useKeyboard } from '../hooks/useKeyboard';
@@ -95,17 +95,32 @@ export const Player = () => {
         (moveLeft - moveRight) ** 2
       );
 
-      // Get forward and right vectors based on camera yaw
-      const forward = new Vector3(0, 0, -1).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
-      const right = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
-      
-      direction.addScaledVector(forward, moveForward - moveBackward);
-      direction.addScaledVector(right, moveRight - moveLeft);
-      direction.normalize().multiplyScalar(currentSpeed * Math.min(inputMagnitude, 1));
+      if (inputMagnitude > 0.01) {
+        // Get forward and right vectors based on camera yaw
+        const forward = new Vector3(0, 0, -1).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
+        const right = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 1, 0), camera.rotation.y);
+        
+        direction.addScaledVector(forward, moveForward - moveBackward);
+        direction.addScaledVector(right, moveRight - moveLeft);
+        direction.normalize().multiplyScalar(currentSpeed * Math.min(inputMagnitude, 1));
+      }
     }
 
     // Collision Detection
     const cubes = useStore.getState().cubes;
+    
+    // Optimize: Create a set of occupied positions for O(1) lookup
+    // We use a simple string key for the set
+    const cubeMap = useMemo(() => {
+      const map = new Set<string>();
+      cubes.forEach(c => {
+        if (c.type !== 'water') {
+          map.add(`${c.pos[0]},${c.pos[1]},${c.pos[2]}`);
+        }
+      });
+      return map;
+    }, [cubes]);
+
     const checkCollision = (nextX: number, nextY: number, nextZ: number) => {
       const px = Math.floor(nextX + 0.5);
       const py = Math.floor(nextY + 0.5);
@@ -115,8 +130,7 @@ export const Player = () => {
       for (let x = px - 1; x <= px + 1; x++) {
         for (let y = py - 1; y <= py + 2; y++) {
           for (let z = pz - 1; z <= pz + 1; z++) {
-            const hasCube = cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z && c.type !== 'water');
-            if (hasCube) {
+            if (cubeMap.has(`${x},${y},${z}`)) {
               const cMinX = x - 0.5;
               const cMaxX = x + 0.5;
               const cMinY = y - 0.5;
@@ -124,11 +138,10 @@ export const Player = () => {
               const cMinZ = z - 0.5;
               const cMaxZ = z + 0.5;
               
-              // Player bounding box (thinner to avoid snagging)
               const pMinX = nextX - 0.2;
               const pMaxX = nextX + 0.2;
-              const pMinY = nextY + 0.2; // Start higher above feet to avoid floor collision
-              const pMaxY = nextY + 1.5; // End below head to avoid ceiling snagging
+              const pMinY = nextY + 0.2; 
+              const pMaxY = nextY + 1.5; 
               const pMinZ = nextZ - 0.2;
               const pMaxZ = nextZ + 0.2;
 

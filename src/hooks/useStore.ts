@@ -104,7 +104,7 @@ export const useStore = create<GameState>((set) => ({
   coins: getLocalStorage('coins') || 100,
   health: 100,
   hunger: 100,
-  gameTime: 0,
+  gameTime: Math.PI / 2.5,
   playerPos: [0, 0, 0],
   playerRotation: [0, 0, 0],
   explosions: [],

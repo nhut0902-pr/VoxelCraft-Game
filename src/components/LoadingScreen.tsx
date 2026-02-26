@@ -14,7 +14,7 @@ export const LoadingScreen = ({ onFinished }: { onFinished: () => void }) => {
   ];
 
   useEffect(() => {
-    const duration = 7000; // 7 seconds
+    const duration = 1000; // Reduced to 1 second
     const interval = 50;
     const step = 100 / (duration / interval);
 
