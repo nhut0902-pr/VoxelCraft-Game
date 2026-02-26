@@ -90,11 +90,18 @@ export const Player = () => {
     const frontVector = new Vector3(0, 0, moveBackward - moveForward);
     const sideVector = new Vector3(moveLeft - moveRight, 0, 0);
 
-    direction
-      .subVectors(frontVector, sideVector)
-      .normalize()
-      .multiplyScalar(currentSpeed * Math.max(moveForward, moveBackward, moveLeft, moveRight, 0.001))
-      .applyEuler(camera.rotation);
+    const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+
+    if (isMoving) {
+      direction
+        .subVectors(frontVector, sideVector)
+        .normalize()
+        .multiplyScalar(currentSpeed)
+        .applyEuler(camera.rotation);
+      
+      // We only care about horizontal movement for this part
+      direction.y = 0;
+    }
 
     // Collision Detection
     const cubes = useStore.getState().cubes;
@@ -103,6 +110,8 @@ export const Player = () => {
       const py = Math.round(nextY);
       const pz = Math.round(nextZ);
       
+      // Check a small volume around the player's body (not feet)
+      // Player height is ~1.7. We check from y+0.1 to y+1.6
       for (let x = px - 1; x <= px + 1; x++) {
         for (let y = py; y <= py + 1; y++) {
           for (let z = pz - 1; z <= pz + 1; z++) {
@@ -115,10 +124,11 @@ export const Player = () => {
               const cMinZ = z - 0.5;
               const cMaxZ = z + 0.5;
               
+              // Player box for horizontal collision (slightly smaller than full height to avoid floor/ceiling snags)
               const pMinX = nextX - 0.3;
               const pMaxX = nextX + 0.3;
-              const pMinY = nextY;
-              const pMaxY = nextY + 1.7;
+              const pMinY = nextY + 0.1; // Start above feet
+              const pMaxY = nextY + 1.6; // End below full height
               const pMinZ = nextZ - 0.3;
               const pMaxZ = nextZ + 0.3;
 
@@ -134,16 +144,18 @@ export const Player = () => {
       return false;
     };
 
-    // Try moving X
-    const nextX = pos.current[0] + direction.x * delta;
-    if (!checkCollision(nextX, pos.current[1], pos.current[2])) {
-      pos.current[0] = nextX;
-    }
+    if (isMoving) {
+      // Try moving X
+      const nextX = pos.current[0] + direction.x * delta;
+      if (!checkCollision(nextX, pos.current[1], pos.current[2])) {
+        pos.current[0] = nextX;
+      }
 
-    // Try moving Z
-    const nextZ = pos.current[2] + direction.z * delta;
-    if (!checkCollision(pos.current[0], pos.current[1], nextZ)) {
-      pos.current[2] = nextZ;
+      // Try moving Z
+      const nextZ = pos.current[2] + direction.z * delta;
+      if (!checkCollision(pos.current[0], pos.current[1], nextZ)) {
+        pos.current[2] = nextZ;
+      }
     }
 
     // Vertical Physics & Collision
