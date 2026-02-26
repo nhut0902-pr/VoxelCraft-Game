@@ -83,19 +83,22 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { icon: <Heart className="text-red-400" />, title: 'Hệ thống Sinh tồn', desc: 'Theo dõi Máu và Cơn đói để sống sót.' },
-                  { icon: <MapIcon className="text-blue-400" />, title: 'Bản đồ nhỏ (Minimap)', desc: 'Dễ dàng định vị trong thế giới 40x40 rộng lớn.' },
-                  { icon: <Box className="text-orange-400" />, title: 'Khối TNT (Thuốc nổ)', desc: 'Phá hủy địa hình nhanh chóng với sức công phá lớn.' },
-                  { icon: <User className="text-emerald-400" />, title: 'NPC Thông minh', desc: 'Các nhân vật ảo giờ đây có tên và có thể trò chuyện.' },
-                  { icon: <Trophy className="text-yellow-400" />, title: 'Hệ thống Thành tựu', desc: 'Hoàn thành các thử thách để nhận phần thưởng.' },
+                  { icon: <Heart className="text-red-400" />, title: 'Sinh tồn', desc: 'Máu & Cơn đói.', img: 'https://picsum.photos/seed/survival/400/200' },
+                  { icon: <MapIcon className="text-blue-400" />, title: 'Minimap', desc: 'Radar định vị.', img: 'https://picsum.photos/seed/map/400/200' },
+                  { icon: <Box className="text-orange-400" />, title: 'TNT', desc: 'Thuốc nổ mạnh.', img: 'https://picsum.photos/seed/tnt/400/200' },
+                  { icon: <User className="text-emerald-400" />, title: 'NPC', desc: 'Nhân vật ảo.', img: 'https://picsum.photos/seed/npc/400/200' },
                 ].map((f, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <div className="p-2 bg-white/5 rounded-xl">{f.icon}</div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white uppercase tracking-tight">{f.title}</h4>
-                      <p className="text-[10px] text-white/40 font-bold uppercase">{f.desc}</p>
+                  <div key={i} className="group relative h-24 rounded-2xl border border-white/10 overflow-hidden">
+                    <img src={f.img} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity" referrerPolicy="no-referrer" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                    <div className="relative h-full p-4 flex items-center gap-3">
+                      <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md">{f.icon}</div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-white uppercase tracking-tighter">{f.title}</h4>
+                        <p className="text-[8px] text-white/40 font-bold uppercase">{f.desc}</p>
+                      </div>
                     </div>
                   </div>
                 ))}

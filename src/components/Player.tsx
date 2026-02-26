@@ -96,35 +96,90 @@ export const Player = () => {
       .multiplyScalar(currentSpeed * Math.max(moveForward, moveBackward, moveLeft, moveRight, 0.001))
       .applyEuler(camera.rotation);
 
-    pos.current[0] += direction.x * delta;
-    pos.current[2] += direction.z * delta;
+    // Collision Detection
+    const cubes = useStore.getState().cubes;
+    const checkCollision = (nextX: number, nextY: number, nextZ: number) => {
+      const px = Math.round(nextX);
+      const py = Math.round(nextY);
+      const pz = Math.round(nextZ);
+      
+      for (let x = px - 1; x <= px + 1; x++) {
+        for (let y = py; y <= py + 1; y++) {
+          for (let z = pz - 1; z <= pz + 1; z++) {
+            const hasCube = cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z && c.type !== 'water');
+            if (hasCube) {
+              const cMinX = x - 0.5;
+              const cMaxX = x + 0.5;
+              const cMinY = y - 0.5;
+              const cMaxY = y + 0.5;
+              const cMinZ = z - 0.5;
+              const cMaxZ = z + 0.5;
+              
+              const pMinX = nextX - 0.3;
+              const pMaxX = nextX + 0.3;
+              const pMinY = nextY;
+              const pMaxY = nextY + 1.7;
+              const pMinZ = nextZ - 0.3;
+              const pMaxZ = nextZ + 0.3;
 
-    const minHeight = 0.1 * playerScale; 
-    const cameraOffset = 1.5 * playerScale;
-
-    // Footstep sound
-    const isMoving = moveForward || moveBackward || moveLeft || moveRight;
-    if (isMoving && pos.current[1] <= minHeight + 0.1) {
-      const now = Date.now();
-      if (now - lastStepTime.current > 400) {
-        playSound('click');
-        lastStepTime.current = now;
+              if (pMinX < cMaxX && pMaxX > cMinX &&
+                  pMinY < cMaxY && pMaxY > cMinY &&
+                  pMinZ < cMaxZ && pMaxZ > cMinZ) {
+                return true;
+              }
+            }
+          }
+        }
       }
+      return false;
+    };
+
+    // Try moving X
+    const nextX = pos.current[0] + direction.x * delta;
+    if (!checkCollision(nextX, pos.current[1], pos.current[2])) {
+      pos.current[0] = nextX;
     }
 
-    if (pos.current[1] > minHeight) {
+    // Try moving Z
+    const nextZ = pos.current[2] + direction.z * delta;
+    if (!checkCollision(pos.current[0], pos.current[1], nextZ)) {
+      pos.current[2] = nextZ;
+    }
+
+    // Vertical Physics & Collision
+    const getBlockAt = (x: number, y: number, z: number) => {
+      const rx = Math.round(x);
+      const ry = Math.round(y);
+      const rz = Math.round(z);
+      return cubes.find(c => c.pos[0] === rx && c.pos[1] === ry && c.pos[2] === rz && c.type !== 'water');
+    };
+
+    const minHeight = -2.0; // Bedrock level
+    const footY = pos.current[1];
+    const blockBelow = getBlockAt(pos.current[0], footY - 0.1, pos.current[2]);
+    const groundY = blockBelow ? blockBelow.pos[1] + 0.5 : minHeight;
+
+    if (pos.current[1] > groundY) {
       velocity.current[1] -= 9.81 * delta;
     } else {
-      pos.current[1] = minHeight;
+      pos.current[1] = groundY;
       velocity.current[1] = 0;
       if (jump) {
         velocity.current[1] = currentJumpForce;
-        playSound('click'); // Using click as placeholder for jump
+        playSound('click');
       }
     }
     
     pos.current[1] += velocity.current[1] * delta;
 
+    // Prevent jumping through blocks above
+    const blockAbove = getBlockAt(pos.current[0], pos.current[1] + 1.8, pos.current[2]);
+    if (blockAbove && velocity.current[1] > 0) {
+      velocity.current[1] = 0;
+      pos.current[1] = blockAbove.pos[1] - 2.3;
+    }
+
+    const cameraOffset = 1.5 * playerScale;
     camera.position.set(pos.current[0], pos.current[1] + cameraOffset, pos.current[2]);
 
     // Sync to store

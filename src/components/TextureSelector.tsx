@@ -4,30 +4,29 @@ import { useKeyboard } from '../hooks/useKeyboard';
 import { useSounds } from '../hooks/useSounds';
 import { motion } from 'motion/react';
 
-const images: Record<BlockType, string> = {
-  dirt: '🟫',
-  grass: '🟩',
-  glass: '⬜',
-  wood: '🪵',
-  log: '🌲',
-  cobblestone: '🧱',
-  water: '💧',
-  leaf: '🍃',
-  sand: '⏳',
-  brick: '🏠',
-  tnt: '🧨'
+const blockColors: Record<BlockType, string> = {
+  dirt: '#5d4037',
+  grass: '#4caf50',
+  glass: '#e1f5fe',
+  wood: '#795548',
+  log: '#3e2723',
+  cobblestone: '#616161',
+  water: '#0288d1',
+  leaf: '#2e7d32',
+  sand: '#fbc02d',
+  brick: '#d32f2f',
+  tnt: '#ff0000',
 };
 
 export const TextureSelector = () => {
   const [visible, setVisible] = useState(false);
   const activeTexture = useStore((state) => state.texture);
   const setTexture = useStore((state) => state.setTexture);
-  const inventory = useStore((state) => state.inventory);
   const { playSound } = useSounds();
   const { digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9, digit0, digitMinus } = useKeyboard();
 
   useEffect(() => {
-    const textures: BlockType[] = Object.keys(images) as BlockType[];
+    const textures: BlockType[] = Object.keys(blockColors) as BlockType[];
     const setAndPlay = (texture: BlockType) => {
       setTexture(texture);
       playSound('click');
@@ -66,7 +65,7 @@ export const TextureSelector = () => {
 
   return (
     <div className="absolute bottom-6 sm:bottom-14 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-3 bg-white/5 p-1.5 sm:p-2 rounded-[2.5rem] backdrop-blur-2xl border border-white/10 z-50 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-w-[95vw] overflow-x-auto no-scrollbar">
-      {(Object.keys(images) as BlockType[]).map((k) => (
+      {(Object.keys(blockColors) as BlockType[]).map((k) => (
         <button
           key={k}
           className={`w-10 h-10 sm:w-14 sm:h-14 flex-shrink-0 flex flex-col items-center justify-center rounded-full cursor-pointer transition-all duration-300 relative group ${
@@ -79,10 +78,11 @@ export const TextureSelector = () => {
             playSound('click');
           }}
         >
-          <span className="text-lg sm:text-2xl group-active:scale-90 transition-transform">{images[k]}</span>
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[8px] sm:text-[10px] font-black px-1.5 rounded-full border border-white/20">
-            {inventory[k]}
-          </span>
+          <div 
+            className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg shadow-inner group-active:scale-90 transition-transform"
+            style={{ backgroundColor: blockColors[k] }}
+          />
+          <span className="text-[8px] sm:text-[10px] font-black text-white/40 uppercase mt-1">{k}</span>
           {k === activeTexture && (
             <motion.div 
               layoutId="active-glow"

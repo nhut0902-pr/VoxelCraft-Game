@@ -72,7 +72,7 @@ export interface GameState {
 }
 
 const INITIAL_INVENTORY: Record<BlockType, number> = {
-  grass: 20, dirt: 20, log: 10, glass: 10, wood: 15, cobblestone: 15, water: 5, leaf: 10, sand: 10, brick: 10, tnt: 5
+  grass: 999, dirt: 999, log: 999, glass: 999, wood: 999, cobblestone: 999, water: 999, leaf: 999, sand: 999, brick: 999, tnt: 999
 };
 
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
@@ -118,13 +118,11 @@ export const useStore = create<GameState>((set) => ({
       const exists = state.cubes.some(c => c.pos[0] === x && c.pos[1] === y && c.pos[2] === z);
       if (exists) return state;
 
-      if (state.inventory[state.texture] <= 0) return state;
-      
       const newInventory = { 
         ...state.inventory, 
-        [state.texture]: state.inventory[state.texture] - 1 
+        [state.texture]: state.inventory[state.texture] // Keep it infinite
       };
-      setLocalStorage('inventory', newInventory);
+      // setLocalStorage('inventory', newInventory); // No need to save inventory if infinite
 
       // Reward coins
       const newCoins = state.coins + 2;
